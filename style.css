@@ -1062,6 +1062,114 @@ img {
   background: rgba(255, 255, 255, 0.08);
 }
 
+/* =========================================================
+   STREAMER ADD FORM
+========================================================= */
+
+.add-streamer-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  padding: 20px;
+}
+
+/* YouTube URL入力欄 */
+.add-streamer-form input {
+  width: 100%;
+  height: 46px;
+  padding: 0 14px;
+
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 9px;
+  outline: none;
+
+  color: var(--text);
+  background: #191a1c;
+
+  font-size: 13px;
+
+  transition:
+    border-color 0.16s ease,
+    background 0.16s ease,
+    box-shadow 0.16s ease;
+}
+
+.add-streamer-form input::placeholder {
+  color: #70737a;
+}
+
+.add-streamer-form input:hover {
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+.add-streamer-form input:focus {
+  border-color: rgba(255, 255, 255, 0.24);
+  background: #1c1d1f;
+  box-shadow:
+    0 0 0 3px rgba(255, 255, 255, 0.035);
+}
+
+/* 追加ボタン */
+.add-streamer-form button {
+  height: 46px;
+  min-width: 78px;
+  padding: 0 18px;
+
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 9px;
+
+  color: #171819;
+  background: #dfe0e3;
+
+  cursor: pointer;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  transition:
+    background 0.16s ease,
+    transform 0.16s ease;
+}
+
+.add-streamer-form button:hover {
+  background: #f0f0f1;
+  transform: translateY(-1px);
+}
+
+.add-streamer-form button:active {
+  transform: translateY(0);
+}
+
+.add-streamer-form button:disabled {
+  opacity: 0.5;
+  cursor: default;
+  transform: none;
+}
+
+/* 結果メッセージ */
+.add-streamer-form .auth-message {
+  grid-column: 1 / -1;
+
+  min-height: 18px;
+  margin: -3px 0 0;
+
+  color: var(--text-muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+
+/* スマホ */
+@media (max-width: 650px) {
+  .add-streamer-form {
+    grid-template-columns: 1fr;
+    padding: 15px;
+  }
+
+  .add-streamer-form button {
+    width: 100%;
+  }
+}
 
 /* =========================================================
    SETTINGS

@@ -34,7 +34,6 @@ if (CONFIG.SUPABASE_URL && CONFIG.SUPABASE_PUBLISHABLE_KEY && window.supabase) {
 ========================= */
 
 let myStreamers = [];
-let allStreamers = [];
 
 let allVideos = [];
 
@@ -53,7 +52,9 @@ function idToEmail(id) {
 function fmtDate(value) {
   const d = new Date(value);
 
-  if (Number.isNaN(d.getTime())) return "";
+  if (Number.isNaN(d.getTime())) {
+    return "";
+  }
 
   return new Intl.DateTimeFormat("ja-JP", {
     year: "numeric",
@@ -65,7 +66,9 @@ function fmtDate(value) {
 function fmtTime(value) {
   const d = new Date(value);
 
-  if (Number.isNaN(d.getTime())) return "--:--";
+  if (Number.isNaN(d.getTime())) {
+    return "--:--";
+  }
 
   return new Intl.DateTimeFormat("ja-JP", {
     hour: "2-digit",
@@ -115,8 +118,8 @@ async function login() {
     return;
   }
 
-  const id = $("#authId").value.trim();
-  const password = $("#authPassword").value;
+  const id = $("#authId")?.value.trim();
+  const password = $("#authPassword")?.value || "";
 
   if (!id || !password) {
     showAuthMessage("IDとパスワードを入力してください。");
@@ -160,11 +163,8 @@ async function signup() {
     return;
   }
 
-  const id = $("#authId").value.trim();
-  const password = $("#authPassword").value;
-
-  console.log("SIGNUP ID:", JSON.stringify(id));
-  console.log("SIGNUP PASSWORD LENGTH:", password.length);
+  const id = $("#authId")?.value.trim();
+  const password = $("#authPassword")?.value || "";
 
   if (!id || !password) {
     showAuthMessage("IDとパスワードを入力してください。");
@@ -229,18 +229,37 @@ async function signup() {
 ========================= */
 
 async function startApp() {
-  $("#authScreen").classList.add("hidden");
-  $("#app").classList.remove("hidden");
+  const authScreen = $("#authScreen");
+  const app = $("#app");
+
+  if (authScreen) {
+    authScreen.classList.add("hidden");
+  }
+
+  if (app) {
+    app.classList.remove("hidden");
+  }
 
   const username =
     currentUser?.user_metadata?.username ||
     currentUser?.email?.split("@")[0] ||
     "---";
 
-  $("#userName").textContent = username;
-  $("#userMark").textContent = username.charAt(0).toUpperCase();
+  const userName = $("#userName");
+  const userMark = $("#userMark");
+  const settingsUserId = $("#settingsUserId");
 
-  $("#settingsUserId").textContent = username;
+  if (userName) {
+    userName.textContent = username;
+  }
+
+  if (userMark) {
+    userMark.textContent = username.charAt(0).toUpperCase() || "?";
+  }
+
+  if (settingsUserId) {
+    settingsUserId.textContent = username;
+  }
 
   await loadStreamers();
   await loadData();
@@ -251,7 +270,9 @@ async function startApp() {
 ========================= */
 
 async function loadStreamers() {
-  if (!supabaseClient || !currentUser) return;
+  if (!supabaseClient || !currentUser) {
+    return;
+  }
 
   try {
     const { data, error } = await supabaseClient
@@ -272,26 +293,28 @@ async function loadStreamers() {
       .eq("user_id", currentUser.id)
       .eq("enabled", true);
 
-    if (error) throw error;
+    if (error) {
+      throw error;
+    }
 
-    myStreamers = (data || []).map((row) => row.streamers).filter(Boolean);
-
-    const { data: allData, error: allError } = await supabaseClient
-      .from("streamers")
-      .select("*")
-      .eq("enabled", true)
-      .order("name");
-
-    if (allError) throw allError;
-
-    allStreamers = allData || [];
+    myStreamers = (data || [])
+      .map((row) => row.streamers)
+      .filter(Boolean)
+      .filter((streamer) => streamer.enabled !== false);
 
     renderStreamers();
   } catch (error) {
     console.error("streamer load error:", error);
 
-    $("#myStreamers").innerHTML =
-      `<div class="empty">ストリーマー情報を取得できませんでした。</div>`;
+    const list = $("#myStreamers");
+
+    if (list) {
+      list.innerHTML = `
+        <div class="empty">
+          ストリーマー情報を取得できませんでした。
+        </div>
+      `;
+    }
   }
 }
 
@@ -299,24 +322,88 @@ async function loadStreamers() {
    ADD STREAMER
 ========================= */
 
-async function addStreamer(streamerId) {
-  if (!currentUser) return;
+function showAddStreamerMessage(message) {
+  const element = $("#addStreamerMessage");
+
+  if (element) {
+    element.textContent = message || "";
+  }
+}
+
+function setAddStreamerLoading(loading) {
+  const button = $("#addStreamerButton");
+
+  if (!button) {
+    return;
+  }
+
+  button.disabled = loading;
+  button.textContent = loading ? "追加中…" : "追加";
+}
+
+async function requestAddStreamer(url) {
+  if (!supabaseClient) {
+    showAddStreamerMessage("Supabaseに接続できません。");
+    return;
+  }
+
+  if (!currentUser) {
+    showAddStreamerMessage("ログインしてください。");
+    return;
+  }
+
+  const value = String(url || "").trim();
+
+  if (!value) {
+    showAddStreamerMessage("YouTubeチャンネルURLを入力してください。");
+    return;
+  }
+
+  setAddStreamerLoading(true);
+  showAddStreamerMessage("");
 
   try {
-    const { error } = await supabaseClient.from("user_streamers").insert({
-      user_id: currentUser.id,
-      streamer_id: streamerId,
-      enabled: true,
-    });
+    const { data, error } = await supabaseClient.functions.invoke(
+      "add-streamer",
+      {
+        body: {
+          url: value,
+        },
+      },
+    );
 
-    if (error) throw error;
+    if (error) {
+      console.error("add-streamer function error:", error);
+
+      throw new Error(
+        "ストリーマーを追加できませんでした。URLやEdge Functionの設定を確認してください。",
+      );
+    }
+
+    if (!data?.success) {
+      throw new Error(data?.message || "ストリーマーを追加できませんでした。");
+    }
+
+    const streamerName = data.streamer?.name || "ストリーマー";
+
+    showAddStreamerMessage(`${streamerName}を追加しました。`);
+
+    const input = $("#streamerUrl");
+
+    if (input) {
+      input.value = "";
+    }
 
     await loadStreamers();
     await loadData();
   } catch (error) {
-    console.error(error);
+    console.error("requestAddStreamer error:", error);
 
-    alert("ストリーマーを追加できませんでした。");
+    showAddStreamerMessage(
+      error?.message || "ストリーマーを追加できませんでした。",
+    );
+  } finally {
+    setAddStreamerLoading(false);
   }
 }
 
@@ -325,7 +412,13 @@ async function addStreamer(streamerId) {
 ========================= */
 
 async function removeStreamer(streamerId) {
-  if (!currentUser) return;
+  if (!supabaseClient || !currentUser) {
+    return;
+  }
+
+  if (!streamerId) {
+    return;
+  }
 
   try {
     const { error } = await supabaseClient
@@ -334,12 +427,14 @@ async function removeStreamer(streamerId) {
       .eq("user_id", currentUser.id)
       .eq("streamer_id", streamerId);
 
-    if (error) throw error;
+    if (error) {
+      throw error;
+    }
 
     await loadStreamers();
     await loadData();
   } catch (error) {
-    console.error(error);
+    console.error("remove streamer error:", error);
 
     alert("ストリーマーを削除できませんでした。");
   }
@@ -349,23 +444,24 @@ async function removeStreamer(streamerId) {
    RENDER STREAMERS
 ========================= */
 
-function streamerRow(streamer, action) {
+function streamerRow(streamer) {
   return `
     <div class="streamer-row">
 
       <div class="streamer-main">
 
         <div class="streamer-avatar">
-
           ${
             streamer.thumbnail
-              ? `<img
+              ? `
+                <img
                   src="${esc(streamer.thumbnail)}"
                   alt=""
-                >`
+                  loading="lazy"
+                >
+              `
               : ""
           }
-
         </div>
 
         <div class="streamer-name">
@@ -376,10 +472,11 @@ function streamerRow(streamer, action) {
 
       <button
         class="streamer-action"
-        data-streamer-action="${action}"
+        type="button"
+        data-streamer-action="remove"
         data-streamer-id="${esc(streamer.id)}"
       >
-        ${action === "add" ? "追加" : "削除"}
+        削除
       </button>
 
     </div>
@@ -387,44 +484,70 @@ function streamerRow(streamer, action) {
 }
 
 function renderStreamers() {
-  const mine = $("#myStreamers");
-  const available = $("#availableStreamers");
+  const list = $("#myStreamers");
+
+  if (!list) {
+    return;
+  }
 
   if (!myStreamers.length) {
-    mine.innerHTML = `
+    list.innerHTML = `
       <div class="empty">
-        まだストリーマーが登録されていません。
+        登録中のストリーマーはいません。
       </div>
     `;
-  } else {
-    mine.innerHTML = myStreamers.map((s) => streamerRow(s, "remove")).join("");
+
+    return;
   }
 
-  const myIds = new Set(myStreamers.map((s) => s.id));
+  list.innerHTML = myStreamers
+    .map((streamer) => streamerRow(streamer))
+    .join("");
 
-  const notAdded = allStreamers.filter((s) => !myIds.has(s.id));
+  list.querySelectorAll('[data-streamer-action="remove"]').forEach((button) => {
+    button.addEventListener("click", async () => {
+      const streamerId = button.dataset.streamerId;
 
-  if (!notAdded.length) {
-    available.innerHTML = `
-      <div class="empty">
-        追加できるストリーマーはありません。
-      </div>
-    `;
-  } else {
-    available.innerHTML = notAdded.map((s) => streamerRow(s, "add")).join("");
-  }
-
-  document.querySelectorAll("[data-streamer-action]").forEach((button) => {
-    button.addEventListener("click", () => {
-      const id = button.dataset.streamerId;
-
-      if (button.dataset.streamerAction === "add") {
-        addStreamer(id);
-      } else {
-        removeStreamer(id);
+      if (!streamerId) {
+        return;
       }
+
+      button.disabled = true;
+
+      await removeStreamer(streamerId);
     });
   });
+}
+
+/* =========================
+   ADD STREAMER EVENTS
+========================= */
+
+function setupStreamerAddEvents() {
+  const button = $("#addStreamerButton");
+  const input = $("#streamerUrl");
+
+  if (button) {
+    button.addEventListener("click", async () => {
+      const url = input?.value.trim() || "";
+
+      await requestAddStreamer(url);
+    });
+  }
+
+  if (input) {
+    input.addEventListener("keydown", async (event) => {
+      if (event.key !== "Enter") {
+        return;
+      }
+
+      event.preventDefault();
+
+      const url = input.value.trim();
+
+      await requestAddStreamer(url);
+    });
+  }
 }
 
 /* =========================
@@ -432,22 +555,42 @@ function renderStreamers() {
 ========================= */
 
 async function loadData() {
-  if (!supabaseClient || !currentUser) return;
+  if (!supabaseClient || !currentUser) {
+    return;
+  }
 
   if (!myStreamers.length) {
+    allVideos = [];
+
     liveRows = [];
     upcomingRows = [];
     latestRows = [];
 
     renderAll();
 
-    $("#lastSync").textContent = "ストリーマー未登録";
+    const lastSync = $("#lastSync");
+
+    if (lastSync) {
+      lastSync.textContent = "ストリーマー未登録";
+    }
 
     return;
   }
 
   try {
-    const ids = myStreamers.map((s) => s.id);
+    const ids = myStreamers.map((streamer) => streamer.id).filter(Boolean);
+
+    if (!ids.length) {
+      allVideos = [];
+
+      liveRows = [];
+      upcomingRows = [];
+      latestRows = [];
+
+      renderAll();
+
+      return;
+    }
 
     const { data, error } = await supabaseClient
       .from("videos")
@@ -458,7 +601,9 @@ async function loadData() {
       })
       .limit(200);
 
-    if (error) throw error;
+    if (error) {
+      throw error;
+    }
 
     allVideos = data || [];
 
@@ -476,14 +621,22 @@ async function loadData() {
 
     renderAll();
 
-    $("#lastSync").textContent = `最終確認 ${new Intl.DateTimeFormat("ja-JP", {
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(new Date())}`;
+    const lastSync = $("#lastSync");
+
+    if (lastSync) {
+      lastSync.textContent = `最終確認 ${new Intl.DateTimeFormat("ja-JP", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }).format(new Date())}`;
+    }
   } catch (error) {
     console.error("video load error:", error);
 
-    $("#lastSync").textContent = "接続エラー";
+    const lastSync = $("#lastSync");
+
+    if (lastSync) {
+      lastSync.textContent = "接続エラー";
+    }
   }
 }
 
@@ -531,7 +684,9 @@ function liveCard(x) {
 function renderLive(rows, target) {
   const root = $(target);
 
-  if (!root) return;
+  if (!root) {
+    return;
+  }
 
   if (!rows.length) {
     root.innerHTML = `
@@ -592,7 +747,9 @@ function scheduleItem(x) {
 function renderUpcoming(rows, target, limit = 8) {
   const root = $(target);
 
-  if (!root) return;
+  if (!root) {
+    return;
+  }
 
   if (!rows.length) {
     root.innerHTML = `
@@ -626,10 +783,13 @@ function latestItem(x) {
 
         ${
           x.thumbnail
-            ? `<img
+            ? `
+              <img
                 src="${esc(x.thumbnail)}"
                 alt=""
-              >`
+                loading="lazy"
+              >
+            `
             : ""
         }
 
@@ -658,7 +818,9 @@ function latestItem(x) {
 function renderLatest(rows, target, limit = 8) {
   const root = $(target);
 
-  if (!root) return;
+  if (!root) {
+    return;
+  }
 
   if (!rows.length) {
     root.innerHTML = `
@@ -699,6 +861,12 @@ function renderAll() {
    VIEW SWITCH
 ========================= */
 
+document.querySelectorAll("[data-view]").forEach((el) => {
+  el.addEventListener("click", () => {
+    setView(el.dataset.view);
+  });
+});
+
 function setView(view) {
   document.querySelectorAll(".view").forEach((el) => {
     el.classList.toggle("active", el.id === `${view}View`);
@@ -718,10 +886,6 @@ function setView(view) {
   });
 }
 
-document.querySelectorAll("[data-view]").forEach((el) => {
-  el.addEventListener("click", () => setView(el.dataset.view));
-});
-
 /* =========================
    SIDEBAR
 ========================= */
@@ -729,36 +893,66 @@ document.querySelectorAll("[data-view]").forEach((el) => {
 const sidebar = $("#sidebar");
 const main = document.querySelector(".main");
 
-$("#collapseMenu").addEventListener("click", () => {
-  const collapsed = sidebar.classList.toggle("collapsed");
+const collapseMenu = $("#collapseMenu");
 
-  main.classList.toggle("sidebar-collapsed", collapsed);
+if (collapseMenu && sidebar && main) {
+  collapseMenu.addEventListener("click", () => {
+    const collapsed = sidebar.classList.toggle("collapsed");
 
-  $("#collapseMenu").textContent = collapsed ? "›" : "‹";
-});
+    main.classList.toggle("sidebar-collapsed", collapsed);
+
+    collapseMenu.textContent = collapsed ? "›" : "‹";
+  });
+}
 
 function openMobile() {
-  sidebar.classList.add("open");
+  if (sidebar) {
+    sidebar.classList.add("open");
+  }
 
-  $("#sidebarOverlay").classList.add("show");
+  const overlay = $("#sidebarOverlay");
+
+  if (overlay) {
+    overlay.classList.add("show");
+  }
 }
 
 function closeMobile() {
-  sidebar.classList.remove("open");
+  if (sidebar) {
+    sidebar.classList.remove("open");
+  }
 
-  $("#sidebarOverlay").classList.remove("show");
+  const overlay = $("#sidebarOverlay");
+
+  if (overlay) {
+    overlay.classList.remove("show");
+  }
 }
 
-$("#mobileMenu").addEventListener("click", openMobile);
+const mobileMenu = $("#mobileMenu");
 
-$("#sidebarOverlay").addEventListener("click", closeMobile);
+if (mobileMenu) {
+  mobileMenu.addEventListener("click", openMobile);
+}
+
+const sidebarOverlay = $("#sidebarOverlay");
+
+if (sidebarOverlay) {
+  sidebarOverlay.addEventListener("click", closeMobile);
+}
 
 /* =========================
    CLOCK
 ========================= */
 
 function updateClock() {
-  $("#clock").textContent = new Intl.DateTimeFormat("ja-JP", {
+  const clock = $("#clock");
+
+  if (!clock) {
+    return;
+  }
+
+  clock.textContent = new Intl.DateTimeFormat("ja-JP", {
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",
@@ -773,27 +967,45 @@ setInterval(updateClock, 1000);
    LOGOUT
 ========================= */
 
-$("#logoutButton").addEventListener("click", async () => {
-  if (!supabaseClient) return;
+const logoutButton = $("#logoutButton");
 
-  await supabaseClient.auth.signOut();
+if (logoutButton) {
+  logoutButton.addEventListener("click", async () => {
+    if (!supabaseClient) {
+      return;
+    }
 
-  location.reload();
-});
+    await supabaseClient.auth.signOut();
+
+    location.reload();
+  });
+}
 
 /* =========================
    AUTH EVENTS
 ========================= */
 
-$("#loginButton").addEventListener("click", login);
+const loginButton = $("#loginButton");
 
-$("#signupButton").addEventListener("click", signup);
+if (loginButton) {
+  loginButton.addEventListener("click", login);
+}
 
-$("#authPassword").addEventListener("keydown", (event) => {
-  if (event.key === "Enter") {
-    login();
-  }
-});
+const signupButton = $("#signupButton");
+
+if (signupButton) {
+  signupButton.addEventListener("click", signup);
+}
+
+const authPassword = $("#authPassword");
+
+if (authPassword) {
+  authPassword.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      login();
+    }
+  });
+}
 
 /* =========================
    PREVIEW MODE
@@ -805,20 +1017,33 @@ const previewMode =
 function startPreview() {
   currentUser = {
     id: "preview-user",
+
     user_metadata: {
       username: "preview",
     },
   };
 
-  $("#authScreen").classList.add("hidden");
+  $("#authScreen")?.classList.add("hidden");
 
-  $("#app").classList.remove("hidden");
+  $("#app")?.classList.remove("hidden");
 
-  $("#userName").textContent = "preview";
+  const userName = $("#userName");
 
-  $("#userMark").textContent = "P";
+  const userMark = $("#userMark");
 
-  $("#settingsUserId").textContent = "preview";
+  const settingsUserId = $("#settingsUserId");
+
+  if (userName) {
+    userName.textContent = "preview";
+  }
+
+  if (userMark) {
+    userMark.textContent = "P";
+  }
+
+  if (settingsUserId) {
+    settingsUserId.textContent = "preview";
+  }
 
   /* -------------------------
      仮ストリーマー
@@ -831,20 +1056,11 @@ function startPreview() {
       channel_id: "UCX4WL24YEOUYd7qDsFSLDOw",
       thumbnail: "",
     },
+
     {
       id: "sample-streamer",
       name: "サンプルストリーマー",
       channel_id: "sample",
-      thumbnail: "",
-    },
-  ];
-
-  allStreamers = [
-    ...myStreamers,
-    {
-      id: "another-streamer",
-      name: "もうひとりのストリーマー",
-      channel_id: "another",
       thumbnail: "",
     },
   ];
@@ -856,80 +1072,131 @@ function startPreview() {
   allVideos = [
     {
       video_id: "preview-live",
+
       streamer_id: "yano-kuromu",
+
       streamer_name: "夜乃くろむ",
+
       status: "live",
+
       title: "【雑談】ゆっくりおはなし",
+
       thumbnail: "https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg",
+
       url: "https://www.youtube.com/",
+
       published_at: new Date().toISOString(),
     },
 
     {
       video_id: "preview-live-2",
+
       streamer_id: "sample-streamer",
+
       streamer_name: "サンプルストリーマー",
+
       status: "live",
+
       title: "【ゲーム】今日も遊ぶ",
+
       thumbnail: "https://i.ytimg.com/vi/ScMzIvxBSi4/maxresdefault.jpg",
+
       url: "https://www.youtube.com/",
+
       published_at: new Date().toISOString(),
     },
 
     {
       video_id: "preview-upcoming",
+
       streamer_id: "yano-kuromu",
+
       streamer_name: "夜乃くろむ",
+
       status: "upcoming",
+
       title: "【配信予定】夜の雑談配信",
+
       scheduled_at: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+
       thumbnail: "https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg",
+
       url: "https://www.youtube.com/",
+
       published_at: new Date().toISOString(),
     },
 
     {
       video_id: "preview-upcoming-2",
+
       streamer_id: "sample-streamer",
+
       streamer_name: "サンプルストリーマー",
+
       status: "upcoming",
+
       title: "【Apex Legends】ランクやります",
+
       scheduled_at: new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString(),
+
       thumbnail: "https://i.ytimg.com/vi/ScMzIvxBSi4/maxresdefault.jpg",
+
       url: "https://www.youtube.com/",
+
       published_at: new Date().toISOString(),
     },
 
     {
       video_id: "preview-video-1",
+
       streamer_id: "yano-kuromu",
+
       streamer_name: "夜乃くろむ",
+
       status: "video",
+
       title: "【切り抜き】最近あったことを話す",
+
       thumbnail: "https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg",
+
       url: "https://www.youtube.com/",
+
       published_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
     },
 
     {
       video_id: "preview-video-2",
+
       streamer_id: "sample-streamer",
+
       streamer_name: "サンプルストリーマー",
+
       status: "video",
+
       title: "【Minecraft】まったり建築",
+
       thumbnail: "https://i.ytimg.com/vi/ScMzIvxBSi4/maxresdefault.jpg",
+
       url: "https://www.youtube.com/",
+
       published_at: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(),
     },
 
     {
       video_id: "preview-video-3",
+
       streamer_id: "yano-kuromu",
+
       streamer_name: "夜乃くろむ",
+
       status: "archive",
+
       title: "【アーカイブ】昨日の配信",
+
       thumbnail: "https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg",
+
       url: "https://www.youtube.com/",
+
       published_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
     },
   ];
@@ -950,7 +1217,11 @@ function startPreview() {
 
   renderStreamers();
 
-  $("#lastSync").textContent = "デザインプレビュー";
+  const lastSync = $("#lastSync");
+
+  if (lastSync) {
+    lastSync.textContent = "デザインプレビュー";
+  }
 
   /* -------------------------
      プレビュー表示
@@ -961,15 +1232,25 @@ function startPreview() {
   previewNotice.textContent = "DESIGN PREVIEW";
 
   previewNotice.style.position = "fixed";
+
   previewNotice.style.right = "18px";
+
   previewNotice.style.bottom = "18px";
+
   previewNotice.style.zIndex = "9999";
+
   previewNotice.style.padding = "7px 10px";
+
   previewNotice.style.border = "1px solid rgba(255,255,255,.1)";
+
   previewNotice.style.borderRadius = "6px";
+
   previewNotice.style.background = "rgba(20,21,22,.9)";
+
   previewNotice.style.color = "#777";
+
   previewNotice.style.fontSize = "9px";
+
   previewNotice.style.letterSpacing = ".12em";
 
   document.body.appendChild(previewNotice);
@@ -1009,13 +1290,11 @@ async function init() {
 
     await startApp();
   } else {
-    $("#authScreen").classList.remove("hidden");
+    $("#authScreen")?.classList.remove("hidden");
 
-    $("#app").classList.add("hidden");
+    $("#app")?.classList.add("hidden");
   }
 }
-
-init();
 
 /* =========================
    AUTO REFRESH
@@ -1026,7 +1305,16 @@ setInterval(async () => {
     return;
   }
 
-  if (currentUser && !$("#app").classList.contains("hidden")) {
+  if (currentUser && !$("#app")?.classList.contains("hidden")) {
+    await loadStreamers();
     await loadData();
   }
 }, 60000);
+
+/* =========================
+   START
+========================= */
+
+setupStreamerAddEvents();
+
+init();

@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="ja">
 <head>
@@ -127,24 +128,27 @@
       </button>
 
     </nav>
-<button
-  class="menu-item"
-  type="button"
-  onclick="location.href='display.html'"
->
-  <span class="menu-icon">▣</span>
-  <span>Display</span>
-</button>
+
+    <button
+      class="menu-item"
+      type="button"
+      onclick="location.href='display.html'"
+    >
+      <span class="menu-icon">▣</span>
+      <span>Display</span>
+    </button>
 
     <div class="sidebar-bottom">
 
       <div class="sidebar-user">
+
         <div class="user-mark" id="userMark">?</div>
 
         <div class="user-info">
           <div id="userName">---</div>
           <span>ログイン中</span>
         </div>
+
       </div>
 
       <button class="menu-item" data-view="settings">
@@ -197,13 +201,17 @@
         <div class="welcome">
 
           <div>
-            <div class="eyebrow">STREAMER ACTIVITY</div>
+
+            <div class="eyebrow">
+              STREAMER ACTIVITY
+            </div>
 
             <h1>おかえりなさい。</h1>
 
             <p>
               推しの「今」を、ひとつの場所に。
             </p>
+
           </div>
 
           <div class="clock" id="clock">
@@ -358,7 +366,9 @@
           </div>
 
           <div id="myStreamers" class="streamer-list">
-            <div class="loading">読み込み中…</div>
+            <div class="loading">
+              読み込み中…
+            </div>
           </div>
 
         </div>
@@ -367,11 +377,31 @@
         <div class="streamer-panel">
 
           <div class="panel-title">
-            追加できるストリーマー
+            ストリーマーを追加
           </div>
 
-          <div id="availableStreamers" class="streamer-list">
-            <div class="loading">読み込み中…</div>
+          <div class="add-streamer-form">
+
+            <input
+              id="streamerUrl"
+              type="url"
+              placeholder="YouTubeチャンネルURLを入力"
+              autocomplete="off"
+            >
+
+            <button
+              id="addStreamerButton"
+              class="primary-button"
+              type="button"
+            >
+              追加
+            </button>
+
+            <div
+              id="addStreamerMessage"
+              class="auth-message"
+            ></div>
+
           </div>
 
         </div>
@@ -411,21 +441,33 @@
           <div class="setting-row">
 
             <div>
-              <div class="setting-title">アカウントID</div>
-              <div class="setting-value" id="settingsUserId">
+              <div class="setting-title">
+                アカウントID
+              </div>
+
+              <div
+                class="setting-value"
+                id="settingsUserId"
+              >
                 ---
               </div>
             </div>
 
           </div>
 
+
           <div class="setting-row">
 
             <div>
-              <div class="setting-title">データ同期</div>
+
+              <div class="setting-title">
+                データ同期
+              </div>
+
               <div class="setting-description">
                 ストリーマー設定はアカウントに保存されます。
               </div>
+
             </div>
 
             <span class="status-badge">
@@ -434,7 +476,11 @@
 
           </div>
 
-          <button id="logoutButton" class="logout-button">
+
+          <button
+            id="logoutButton"
+            class="logout-button"
+          >
             ログアウト
           </button>
 
