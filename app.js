@@ -163,6 +163,9 @@ async function signup() {
   const id = $("#authId").value.trim();
   const password = $("#authPassword").value;
 
+  console.log("SIGNUP ID:", JSON.stringify(id));
+  console.log("SIGNUP PASSWORD LENGTH:", password.length);
+
   if (!id || !password) {
     showAuthMessage("IDとパスワードを入力してください。");
     return;
