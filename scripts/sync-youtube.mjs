@@ -40,11 +40,8 @@ const hms = (v) => {
 ========================================================= */
 
 async function supabaseGet(path, params = {}) {
+  console.log("Supabase URL:", env.supabaseUrl);
   const u = new URL(`${env.supabaseUrl}/rest/v1/${path}`);
-
-  for (const [key, value] of Object.entries(params)) {
-    u.searchParams.set(key, value);
-  }
 
   const r = await fetch(u, {
     headers: {
