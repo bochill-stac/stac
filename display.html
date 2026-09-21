@@ -7,9 +7,15 @@
     content="width=device-width, initial-scale=1.0, viewport-fit=cover"
   >
 
-  <title>STAC Display</title>
-
+  <title>スト活 Display</title>
+  <meta name="theme-color" content="#111214">
   <link rel="stylesheet" href="display.css">
+  <script>
+    (function () {
+      const theme = localStorage.getItem("stac-theme") === "light" ? "light" : "dark";
+      document.documentElement.dataset.theme = theme;
+    })();
+  </script>
 
   <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -31,6 +37,7 @@
       </div>
 
       <div class="header-right">
+        <button id="display-theme" class="display-theme" type="button">ライト</button>
         <div id="display-date" class="display-date">----/--/--</div>
         <div id="display-clock" class="display-clock">--:--</div>
       </div>

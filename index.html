@@ -1,22 +1,210 @@
-<!doctype html><html lang="ja"><head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#151617"><title>STAC — Streamer Activity</title><link rel="stylesheet" href="./style.css"></head>
+<!doctype html>
+<html lang="ja" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#111214">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="スト活">
+  <title>スト活 — Streamer Activity</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
 <body>
-<div id="authScreen" class="auth-screen"><div class="auth-card"><b>STAC</b><small>STREAMER ACTIVITY</small><h1>ストリーマーの活動を、ひとつに。</h1>
-<input id="authId" placeholder="ID" autocomplete="username"><input id="authPassword" type="password" placeholder="パスワード" autocomplete="current-password">
-<div><button id="loginButton">ログイン</button><button id="signupButton">新規登録</button></div><p id="authMessage"></p></div></div>
-<div id="app" class="hidden"><aside id="sidebar"><div class="logo">STAC <button id="sidebarToggle">☰</button></div>
-<nav><button data-view="home">⌂ ホーム</button><button data-view="live">● 配信中</button><button data-view="upcoming">◷ 配信予定</button><button data-view="latest">▤ 最新情報</button><button data-view="streamers">＋ ストリーマー</button><button data-view="settings">⚙ 設定</button></nav>
-<div class="user"><span id="userMark">S</span><span id="userName">---</span><button id="logoutButton">ログアウト</button></div></aside>
-<main><header><button id="mobileMenu">☰</button><span>Streamer Activity</span><small id="lastSync">同期確認中…</small></header><div class="content">
-<section id="homeView" class="view active"><div class="head"><small>STAC</small><h1>ホーム</h1><p>登録したストリーマーの現在の活動。</p></div><h2>配信中</h2><div id="liveList" class="grid"></div><h2>配信予定</h2><div id="upcomingList"></div><h2>最新情報</h2><div id="latestList"></div></section>
-<section id="liveView" class="view"><div class="head"><small>LIVE</small><h1>配信中</h1><p>現在ライブ配信中の登録チャンネル。</p></div><div id="livePageList" class="grid"></div></section>
-<section id="upcomingView" class="view"><div class="head"><small>UPCOMING</small><h1>配信予定</h1></div><div id="upcomingPageList"></div></section>
-<section id="latestView" class="view"><div class="head"><small>LATEST</small><h1>最新情報</h1></div><div id="latestPageList"></div></section>
-<section id="streamersView" class="view"><div class="head"><small>STREAMERS</small><h1>ストリーマー</h1><p>STACで追いかけるストリーマー。</p></div>
-<div class="panel"><h3>登録中</h3><div id="myStreamers">読み込み中…</div></div>
-<div class="panel"><h3>ストリーマーを追加</h3><div class="add"><input id="streamerUrl" placeholder="YouTubeチャンネルURL / @ハンドル"><button id="addStreamerButton">追加</button><p id="addStreamerMessage"></p></div></div></section>
-<section id="settingsView" class="view"><div class="head"><small>SETTINGS</small><h1>設定</h1></div><div class="panel">ユーザーID：<strong id="settingsUserId">---</strong></div></section>
-</div></main></div>
-<script src="./config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="./app.js"></script>
-</body></html>
+
+<div id="authScreen" class="auth-screen">
+  <div class="auth-box">
+    <div class="auth-brand">
+      <div class="auth-title">スト活</div>
+      <div class="auth-subtitle">STREAMER ACTIVITY</div>
+    </div>
+    <div class="auth-form">
+      <p class="auth-lead">推しの配信と予定を、アカウントごとにまとめる。</p>
+      <div class="field">
+        <label for="authId">ID</label>
+        <input id="authId" type="text" autocomplete="username" placeholder="IDを入力">
+      </div>
+      <div class="field">
+        <label for="authPassword">パスワード</label>
+        <input id="authPassword" type="password" autocomplete="current-password" placeholder="パスワードを入力">
+      </div>
+      <button id="loginButton" class="primary-button" type="button">ログイン</button>
+      <button id="signupButton" class="sub-button" type="button">新しくアカウントを作る</button>
+      <div id="authMessage" class="auth-message"></div>
+    </div>
+  </div>
+</div>
+
+<div id="app" class="app-shell hidden">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-head">
+      <div class="brand">
+        <div class="brand-name">スト活</div>
+        <div class="brand-sub">STREAMER ACTIVITY</div>
+      </div>
+      <button id="collapseMenu" class="icon-button" type="button" aria-label="サイドバーを閉じる">‹</button>
+    </div>
+
+    <nav class="menu">
+      <button class="menu-item active" data-view="home" type="button"><span>⌂</span>ホーム</button>
+      <button class="menu-item" data-view="live" type="button"><span class="live-dot">●</span>配信中</button>
+      <button class="menu-item" data-view="upcoming" type="button"><span>◷</span>配信予定</button>
+      <button class="menu-item" data-view="latest" type="button"><span>≡</span>最新情報</button>
+      <button class="menu-item" data-view="streamers" type="button"><span>○</span>ストリーマー</button>
+    </nav>
+
+    <a class="menu-item display-link" href="./display.html">
+      <span>▣</span>Display
+    </a>
+
+    <div class="sidebar-bottom">
+      <div class="sidebar-user">
+        <div class="user-mark" id="userMark">?</div>
+        <div>
+          <div id="userName">---</div>
+          <span class="user-status">ログイン中</span>
+        </div>
+      </div>
+      <button class="menu-item" data-view="settings" type="button"><span>⚙</span>設定</button>
+    </div>
+  </aside>
+
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <main class="main">
+    <header class="topbar">
+      <button class="icon-button mobile-only" id="mobileMenu" type="button" aria-label="メニュー">☰</button>
+      <div class="topbar-title">Streamer Activity</div>
+      <div class="topbar-right">
+        <span id="lastSync" class="last-sync">同期確認中…</span>
+        <button id="themeToggle" class="theme-button" type="button" aria-label="テーマ切替">ライト</button>
+      </div>
+    </header>
+
+    <div class="content">
+      <section class="view active" id="homeView">
+        <div class="welcome">
+          <div>
+            <div class="eyebrow">STREAMER ACTIVITY</div>
+            <h1>おかえりなさい。</h1>
+            <p>推しの「今」を、ひとつの場所に。</p>
+          </div>
+          <div class="clock" id="clock">00:00</div>
+        </div>
+
+        <section class="content-section">
+          <div class="section-heading">
+            <div>
+              <div class="eyebrow">LIVE NOW</div>
+              <h2>配信中</h2>
+            </div>
+            <button class="section-link" data-view="live" type="button">すべて見る →</button>
+          </div>
+          <div id="liveList" class="live-grid"><div class="loading">読み込み中…</div></div>
+        </section>
+
+        <section class="content-section">
+          <div class="section-heading">
+            <div>
+              <div class="eyebrow">UPCOMING</div>
+              <h2>配信予定</h2>
+            </div>
+            <button class="section-link" data-view="upcoming" type="button">すべて見る →</button>
+          </div>
+          <div id="upcomingList" class="schedule-board"><div class="loading">読み込み中…</div></div>
+        </section>
+
+        <section class="content-section">
+          <div class="section-heading">
+            <div>
+              <div class="eyebrow">LATEST</div>
+              <h2>最新情報</h2>
+            </div>
+            <button class="section-link" data-view="latest" type="button">すべて見る →</button>
+          </div>
+          <div id="latestList" class="latest-list"><div class="loading">読み込み中…</div></div>
+        </section>
+      </section>
+
+      <section class="view" id="liveView">
+        <div class="page-head">
+          <div class="eyebrow">LIVE NOW</div>
+          <h1>配信中</h1>
+          <p>いま配信している登録ストリーマー</p>
+        </div>
+        <div id="livePageList" class="live-grid"></div>
+      </section>
+
+      <section class="view" id="upcomingView">
+        <div class="page-head">
+          <div class="eyebrow">UPCOMING</div>
+          <h1>配信予定</h1>
+          <p>すぽじゅーるのように、時間帯で並びます</p>
+        </div>
+        <div id="upcomingPageList" class="schedule-board"></div>
+      </section>
+
+      <section class="view" id="latestView">
+        <div class="page-head">
+          <div class="eyebrow">LATEST</div>
+          <h1>最新情報</h1>
+          <p>最近公開された動画・アーカイブ</p>
+        </div>
+        <div id="latestPageList" class="latest-list"></div>
+      </section>
+
+      <section class="view" id="streamersView">
+        <div class="page-head">
+          <div class="eyebrow">STREAMERS</div>
+          <h1>ストリーマー</h1>
+          <p>このアカウントで追いかける配信者</p>
+        </div>
+        <div class="panel">
+          <div class="panel-title">登録中</div>
+          <div id="myStreamers"><div class="loading">読み込み中…</div></div>
+        </div>
+        <div class="panel">
+          <div class="panel-title">ストリーマーを追加</div>
+          <div class="add-form">
+            <input id="streamerUrl" type="text" placeholder="YouTube / Twitch のURL、または @ハンドル" autocomplete="off">
+            <button id="addStreamerButton" class="primary-button" type="button">追加</button>
+            <div id="addStreamerMessage" class="auth-message"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="settingsView">
+        <div class="page-head">
+          <div class="eyebrow">SETTINGS</div>
+          <h1>設定</h1>
+          <p>アカウントと見た目</p>
+        </div>
+        <div class="panel settings-panel">
+          <div class="setting-row">
+            <div>
+              <div class="setting-title">アカウントID</div>
+              <div class="setting-value" id="settingsUserId">---</div>
+            </div>
+          </div>
+          <div class="setting-row">
+            <div>
+              <div class="setting-title">テーマ</div>
+              <div class="setting-description">黒めが基本。明るい画面にも切り替えられます。</div>
+            </div>
+            <div class="theme-pills" id="themePills">
+              <button type="button" data-theme-value="dark">ダーク</button>
+              <button type="button" data-theme-value="light">ライト</button>
+            </div>
+          </div>
+          <button id="logoutButton" class="logout-button" type="button">ログアウト</button>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<script src="./config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="./app.js"></script>
+</body>
+</html>
