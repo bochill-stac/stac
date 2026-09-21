@@ -15,9 +15,9 @@ const esc = (value) =>
       })[c],
   );
 
-/* =========================
+/* =========================================================
    SUPABASE
-========================= */
+========================================================= */
 
 let supabaseClient = null;
 let currentUser = null;
@@ -29,9 +29,9 @@ if (CONFIG.SUPABASE_URL && CONFIG.SUPABASE_PUBLISHABLE_KEY && window.supabase) {
   );
 }
 
-/* =========================
+/* =========================================================
    DATA
-========================= */
+========================================================= */
 
 let myStreamers = [];
 
@@ -41,9 +41,9 @@ let liveRows = [];
 let upcomingRows = [];
 let latestRows = [];
 
-/* =========================
+/* =========================================================
    HELPERS
-========================= */
+========================================================= */
 
 function idToEmail(id) {
   return `${id.toLowerCase()}@stac.local`;
@@ -82,9 +82,9 @@ function openUrl(url) {
   window.open(url, "_blank", "noopener,noreferrer");
 }
 
-/* =========================
+/* =========================================================
    AUTH UI
-========================= */
+========================================================= */
 
 function showAuthMessage(message) {
   const el = $("#authMessage");
@@ -108,9 +108,9 @@ function setAuthLoading(loading) {
   }
 }
 
-/* =========================
+/* =========================================================
    LOGIN
-========================= */
+========================================================= */
 
 async function login() {
   if (!supabaseClient) {
@@ -143,7 +143,7 @@ async function login() {
 
     await startApp();
   } catch (error) {
-    console.error(error);
+    console.error("login error:", error);
 
     showAuthMessage(
       "ログインできませんでした。IDまたはパスワードを確認してください。",
@@ -153,9 +153,9 @@ async function login() {
   }
 }
 
-/* =========================
+/* =========================================================
    SIGN UP
-========================= */
+========================================================= */
 
 async function signup() {
   if (!supabaseClient) {
@@ -188,7 +188,6 @@ async function signup() {
     const { data, error } = await supabaseClient.auth.signUp({
       email: idToEmail(id),
       password,
-
       options: {
         data: {
           username: id,
@@ -202,13 +201,10 @@ async function signup() {
 
     if (data.user) {
       currentUser = data.user;
-
-      showAuthMessage("");
-
       await startApp();
     }
   } catch (error) {
-    console.error(error);
+    console.error("signup error:", error);
 
     if (
       String(error.message || "")
@@ -217,28 +213,23 @@ async function signup() {
     ) {
       showAuthMessage("そのIDはすでに使われています。");
     } else {
-      showAuthMessage("アカウントを作成できませんでした。");
+      showAuthMessage(error?.message || "アカウントを作成できませんでした。");
     }
   } finally {
     setAuthLoading(false);
   }
 }
 
-/* =========================
+/* =========================================================
    START APP
-========================= */
+========================================================= */
 
 async function startApp() {
   const authScreen = $("#authScreen");
   const app = $("#app");
 
-  if (authScreen) {
-    authScreen.classList.add("hidden");
-  }
-
-  if (app) {
-    app.classList.remove("hidden");
-  }
+  authScreen?.classList.add("hidden");
+  app?.classList.remove("hidden");
 
   const username =
     currentUser?.user_metadata?.username ||
@@ -265,9 +256,9 @@ async function startApp() {
   await loadData();
 }
 
-/* =========================
+/* =========================================================
    STREAMERS
-========================= */
+========================================================= */
 
 async function loadStreamers() {
   if (!supabaseClient || !currentUser) {
@@ -318,16 +309,20 @@ async function loadStreamers() {
   }
 }
 
-/* =========================
+/* =========================================================
    ADD STREAMER
-========================= */
+========================================================= */
 
-function showAddStreamerMessage(message) {
+function showAddStreamerMessage(message, isError = false) {
   const element = $("#addStreamerMessage");
 
-  if (element) {
-    element.textContent = message || "";
+  if (!element) {
+    return;
   }
+
+  element.textContent = message || "";
+
+  element.style.color = isError ? "var(--live)" : "var(--text-muted)";
 }
 
 function setAddStreamerLoading(loading) {
@@ -343,19 +338,19 @@ function setAddStreamerLoading(loading) {
 
 async function requestAddStreamer(url) {
   if (!supabaseClient) {
-    showAddStreamerMessage("Supabaseに接続できません。");
+    showAddStreamerMessage("Supabaseに接続できません。", true);
     return;
   }
 
   if (!currentUser) {
-    showAddStreamerMessage("ログインしてください。");
+    showAddStreamerMessage("ログインしてください。", true);
     return;
   }
 
   const value = String(url || "").trim();
 
   if (!value) {
-    showAddStreamerMessage("YouTubeチャンネルURLを入力してください。");
+    showAddStreamerMessage("YouTubeチャンネルURLを入力してください。", true);
     return;
   }
 
@@ -363,6 +358,8 @@ async function requestAddStreamer(url) {
   showAddStreamerMessage("");
 
   try {
+    console.log("[STAC] add-streamer start:", value);
+
     const { data, error } = await supabaseClient.functions.invoke(
       "add-streamer",
       {
@@ -372,21 +369,51 @@ async function requestAddStreamer(url) {
       },
     );
 
-    if (error) {
-      console.error("add-streamer function error:", error);
+    console.log("[STAC] add-streamer response:", {
+      data,
+      error,
+    });
 
-      throw new Error(
-        "ストリーマーを追加できませんでした。URLやEdge Functionの設定を確認してください。",
-      );
+    if (error) {
+      console.error("[STAC] Edge Function error:", error);
+
+      let message = error.message || "Edge Functionの呼び出しに失敗しました。";
+
+      /*
+       * FunctionsHttpErrorの場合、
+       * response bodyに本当のエラーが
+       * 入っていることがある。
+       */
+      try {
+        if (error.context) {
+          const response = error.context;
+
+          if (typeof response.json === "function") {
+            const body = await response.json();
+
+            if (body?.message) {
+              message = body.message;
+            }
+          }
+        }
+      } catch (parseError) {
+        console.warn("[STAC] error body parse failed:", parseError);
+      }
+
+      throw new Error(message);
     }
 
-    if (!data?.success) {
-      throw new Error(data?.message || "ストリーマーを追加できませんでした。");
+    if (!data) {
+      throw new Error("Edge Functionから応答がありませんでした。");
+    }
+
+    if (!data.success) {
+      throw new Error(data.message || "ストリーマーを追加できませんでした。");
     }
 
     const streamerName = data.streamer?.name || "ストリーマー";
 
-    showAddStreamerMessage(`${streamerName}を追加しました。`);
+    showAddStreamerMessage(`${streamerName}を追加しました。`, false);
 
     const input = $("#streamerUrl");
 
@@ -397,19 +424,20 @@ async function requestAddStreamer(url) {
     await loadStreamers();
     await loadData();
   } catch (error) {
-    console.error("requestAddStreamer error:", error);
+    console.error("[STAC] requestAddStreamer error:", error);
 
     showAddStreamerMessage(
       error?.message || "ストリーマーを追加できませんでした。",
+      true,
     );
   } finally {
     setAddStreamerLoading(false);
   }
 }
 
-/* =========================
+/* =========================================================
    REMOVE STREAMER
-========================= */
+========================================================= */
 
 async function removeStreamer(streamerId) {
   if (!supabaseClient || !currentUser) {
@@ -436,13 +464,13 @@ async function removeStreamer(streamerId) {
   } catch (error) {
     console.error("remove streamer error:", error);
 
-    alert("ストリーマーを削除できませんでした。");
+    alert(error?.message || "ストリーマーを削除できませんでした。");
   }
 }
 
-/* =========================
+/* =========================================================
    RENDER STREAMERS
-========================= */
+========================================================= */
 
 function streamerRow(streamer) {
   return `
@@ -519,19 +547,18 @@ function renderStreamers() {
   });
 }
 
-/* =========================
+/* =========================================================
    ADD STREAMER EVENTS
-========================= */
+========================================================= */
 
 function setupStreamerAddEvents() {
   const button = $("#addStreamerButton");
+
   const input = $("#streamerUrl");
 
   if (button) {
     button.addEventListener("click", async () => {
-      const url = input?.value.trim() || "";
-
-      await requestAddStreamer(url);
+      await requestAddStreamer(input?.value.trim() || "");
     });
   }
 
@@ -543,16 +570,14 @@ function setupStreamerAddEvents() {
 
       event.preventDefault();
 
-      const url = input.value.trim();
-
-      await requestAddStreamer(url);
+      await requestAddStreamer(input.value.trim());
     });
   }
 }
 
-/* =========================
+/* =========================================================
    VIDEO DATA
-========================= */
+========================================================= */
 
 async function loadData() {
   if (!supabaseClient || !currentUser) {
@@ -561,7 +586,6 @@ async function loadData() {
 
   if (!myStreamers.length) {
     allVideos = [];
-
     liveRows = [];
     upcomingRows = [];
     latestRows = [];
@@ -582,7 +606,6 @@ async function loadData() {
 
     if (!ids.length) {
       allVideos = [];
-
       liveRows = [];
       upcomingRows = [];
       latestRows = [];
@@ -640,9 +663,9 @@ async function loadData() {
   }
 }
 
-/* =========================
+/* =========================================================
    LIVE
-========================= */
+========================================================= */
 
 function liveCard(x) {
   return `
@@ -705,9 +728,9 @@ function renderLive(rows, target) {
   });
 }
 
-/* =========================
+/* =========================================================
    UPCOMING
-========================= */
+========================================================= */
 
 function scheduleItem(x) {
   return `
@@ -768,9 +791,9 @@ function renderUpcoming(rows, target, limit = 8) {
   });
 }
 
-/* =========================
+/* =========================================================
    LATEST
-========================= */
+========================================================= */
 
 function latestItem(x) {
   return `
@@ -780,7 +803,6 @@ function latestItem(x) {
     >
 
       <div class="latest-thumb">
-
         ${
           x.thumbnail
             ? `
@@ -792,7 +814,6 @@ function latestItem(x) {
             `
             : ""
         }
-
       </div>
 
       <div>
@@ -839,9 +860,9 @@ function renderLatest(rows, target, limit = 8) {
   });
 }
 
-/* =========================
+/* =========================================================
    RENDER ALL
-========================= */
+========================================================= */
 
 function renderAll() {
   renderLive(liveRows, "#liveList");
@@ -857,9 +878,9 @@ function renderAll() {
   renderLatest(latestRows, "#latestPageList", 100);
 }
 
-/* =========================
+/* =========================================================
    VIEW SWITCH
-========================= */
+========================================================= */
 
 document.querySelectorAll("[data-view]").forEach((el) => {
   el.addEventListener("click", () => {
@@ -886,9 +907,9 @@ function setView(view) {
   });
 }
 
-/* =========================
+/* =========================================================
    SIDEBAR
-========================= */
+========================================================= */
 
 const sidebar = $("#sidebar");
 const main = document.querySelector(".main");
@@ -906,44 +927,22 @@ if (collapseMenu && sidebar && main) {
 }
 
 function openMobile() {
-  if (sidebar) {
-    sidebar.classList.add("open");
-  }
-
-  const overlay = $("#sidebarOverlay");
-
-  if (overlay) {
-    overlay.classList.add("show");
-  }
+  sidebar?.classList.add("open");
+  $("#sidebarOverlay")?.classList.add("show");
 }
 
 function closeMobile() {
-  if (sidebar) {
-    sidebar.classList.remove("open");
-  }
-
-  const overlay = $("#sidebarOverlay");
-
-  if (overlay) {
-    overlay.classList.remove("show");
-  }
+  sidebar?.classList.remove("open");
+  $("#sidebarOverlay")?.classList.remove("show");
 }
 
-const mobileMenu = $("#mobileMenu");
+$("#mobileMenu")?.addEventListener("click", openMobile);
 
-if (mobileMenu) {
-  mobileMenu.addEventListener("click", openMobile);
-}
+$("#sidebarOverlay")?.addEventListener("click", closeMobile);
 
-const sidebarOverlay = $("#sidebarOverlay");
-
-if (sidebarOverlay) {
-  sidebarOverlay.addEventListener("click", closeMobile);
-}
-
-/* =========================
+/* =========================================================
    CLOCK
-========================= */
+========================================================= */
 
 function updateClock() {
   const clock = $("#clock");
@@ -963,53 +962,37 @@ updateClock();
 
 setInterval(updateClock, 1000);
 
-/* =========================
+/* =========================================================
    LOGOUT
-========================= */
+========================================================= */
 
-const logoutButton = $("#logoutButton");
+$("#logoutButton")?.addEventListener("click", async () => {
+  if (!supabaseClient) {
+    return;
+  }
 
-if (logoutButton) {
-  logoutButton.addEventListener("click", async () => {
-    if (!supabaseClient) {
-      return;
-    }
+  await supabaseClient.auth.signOut();
 
-    await supabaseClient.auth.signOut();
+  location.reload();
+});
 
-    location.reload();
-  });
-}
-
-/* =========================
+/* =========================================================
    AUTH EVENTS
-========================= */
+========================================================= */
 
-const loginButton = $("#loginButton");
+$("#loginButton")?.addEventListener("click", login);
 
-if (loginButton) {
-  loginButton.addEventListener("click", login);
-}
+$("#signupButton")?.addEventListener("click", signup);
 
-const signupButton = $("#signupButton");
+$("#authPassword")?.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    login();
+  }
+});
 
-if (signupButton) {
-  signupButton.addEventListener("click", signup);
-}
-
-const authPassword = $("#authPassword");
-
-if (authPassword) {
-  authPassword.addEventListener("keydown", (event) => {
-    if (event.key === "Enter") {
-      login();
-    }
-  });
-}
-
-/* =========================
+/* =========================================================
    PREVIEW MODE
-========================= */
+========================================================= */
 
 const previewMode =
   new URLSearchParams(window.location.search).get("preview") === "1";
@@ -1045,10 +1028,6 @@ function startPreview() {
     settingsUserId.textContent = "preview";
   }
 
-  /* -------------------------
-     仮ストリーマー
-  ------------------------- */
-
   myStreamers = [
     {
       id: "yano-kuromu",
@@ -1056,7 +1035,6 @@ function startPreview() {
       channel_id: "UCX4WL24YEOUYd7qDsFSLDOw",
       thumbnail: "",
     },
-
     {
       id: "sample-streamer",
       name: "サンプルストリーマー",
@@ -1065,138 +1043,83 @@ function startPreview() {
     },
   ];
 
-  /* -------------------------
-     仮動画データ
-  ------------------------- */
-
   allVideos = [
     {
       video_id: "preview-live",
-
       streamer_id: "yano-kuromu",
-
       streamer_name: "夜乃くろむ",
-
       status: "live",
-
       title: "【雑談】ゆっくりおはなし",
-
       thumbnail: "https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg",
-
       url: "https://www.youtube.com/",
-
       published_at: new Date().toISOString(),
     },
 
     {
       video_id: "preview-live-2",
-
       streamer_id: "sample-streamer",
-
       streamer_name: "サンプルストリーマー",
-
       status: "live",
-
       title: "【ゲーム】今日も遊ぶ",
-
       thumbnail: "https://i.ytimg.com/vi/ScMzIvxBSi4/maxresdefault.jpg",
-
       url: "https://www.youtube.com/",
-
       published_at: new Date().toISOString(),
     },
 
     {
       video_id: "preview-upcoming",
-
       streamer_id: "yano-kuromu",
-
       streamer_name: "夜乃くろむ",
-
       status: "upcoming",
-
       title: "【配信予定】夜の雑談配信",
-
       scheduled_at: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
-
       thumbnail: "https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg",
-
       url: "https://www.youtube.com/",
-
       published_at: new Date().toISOString(),
     },
 
     {
       video_id: "preview-upcoming-2",
-
       streamer_id: "sample-streamer",
-
       streamer_name: "サンプルストリーマー",
-
       status: "upcoming",
-
       title: "【Apex Legends】ランクやります",
-
       scheduled_at: new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString(),
-
       thumbnail: "https://i.ytimg.com/vi/ScMzIvxBSi4/maxresdefault.jpg",
-
       url: "https://www.youtube.com/",
-
       published_at: new Date().toISOString(),
     },
 
     {
       video_id: "preview-video-1",
-
       streamer_id: "yano-kuromu",
-
       streamer_name: "夜乃くろむ",
-
       status: "video",
-
       title: "【切り抜き】最近あったことを話す",
-
       thumbnail: "https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg",
-
       url: "https://www.youtube.com/",
-
       published_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
     },
 
     {
       video_id: "preview-video-2",
-
       streamer_id: "sample-streamer",
-
       streamer_name: "サンプルストリーマー",
-
       status: "video",
-
       title: "【Minecraft】まったり建築",
-
       thumbnail: "https://i.ytimg.com/vi/ScMzIvxBSi4/maxresdefault.jpg",
-
       url: "https://www.youtube.com/",
-
       published_at: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(),
     },
 
     {
       video_id: "preview-video-3",
-
       streamer_id: "yano-kuromu",
-
       streamer_name: "夜乃くろむ",
-
       status: "archive",
-
       title: "【アーカイブ】昨日の配信",
-
       thumbnail: "https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg",
-
       url: "https://www.youtube.com/",
-
       published_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
     },
   ];
@@ -1214,7 +1137,6 @@ function startPreview() {
     );
 
   renderAll();
-
   renderStreamers();
 
   const lastSync = $("#lastSync");
@@ -1222,10 +1144,6 @@ function startPreview() {
   if (lastSync) {
     lastSync.textContent = "デザインプレビュー";
   }
-
-  /* -------------------------
-     プレビュー表示
-  ------------------------- */
 
   const previewNotice = document.createElement("div");
 
@@ -1256,28 +1174,18 @@ function startPreview() {
   document.body.appendChild(previewNotice);
 }
 
-/* =========================
+/* =========================================================
    INITIAL AUTH CHECK
-========================= */
+========================================================= */
 
 async function init() {
-  /* -------------------------
-     デザイン確認
-  ------------------------- */
-
   if (previewMode) {
     startPreview();
-
     return;
   }
 
-  /* -------------------------
-     通常モード
-  ------------------------- */
-
   if (!supabaseClient) {
     showAuthMessage("Supabaseの設定が読み込めていません。");
-
     return;
   }
 
@@ -1287,7 +1195,6 @@ async function init() {
 
   if (session?.user) {
     currentUser = session.user;
-
     await startApp();
   } else {
     $("#authScreen")?.classList.remove("hidden");
@@ -1296,9 +1203,9 @@ async function init() {
   }
 }
 
-/* =========================
+/* =========================================================
    AUTO REFRESH
-========================= */
+========================================================= */
 
 setInterval(async () => {
   if (previewMode) {
@@ -1311,9 +1218,9 @@ setInterval(async () => {
   }
 }, 60000);
 
-/* =========================
+/* =========================================================
    START
-========================= */
+========================================================= */
 
 setupStreamerAddEvents();
 
