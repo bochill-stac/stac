@@ -1,0 +1,5 @@
+{
+  "name":"stac","private":true,"version":"1.0.0","type":"module",
+  "scripts":{"sync":"node scripts/sync-youtube.mjs"},
+  "dependencies":{"fast-xml-parser":"^5.2.5"}
+}

@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#1d1e20">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="スト活">
+  <title>スト活 — Streamer Activity</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand"><div class="brand-mark">ST</div><div class="brand-copy"><strong>スト活</strong><span>STREAMER ACTIVITY</span></div></div>
+    <nav class="menu" aria-label="メインメニュー">
+      <button class="menu-item active" data-view="home"><span>⌂</span><b>ホーム</b></button>
+      <button class="menu-item" data-view="live"><span>●</span><b>配信中</b></button>
+      <button class="menu-item" data-view="upcoming"><span>◷</span><b>配信予定</b></button>
+      <button class="menu-item" data-view="latest"><span>≡</span><b>最新情報</b></button>
+      <button class="menu-item" data-view="streamers"><span>○</span><b>ストリーマー</b></button>
+      <button class="menu-item" data-view="favorites"><span>☆</span><b>お気に入り</b></button>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="connection"><i></i><span>データ接続済み</span></div>
+      <button class="menu-item" data-view="settings"><span>⚙</span><b>設定</b></button>
+    </div>
+  </aside>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <main class="main">
+    <header class="topbar">
+      <button class="icon-button mobile-only" id="mobileMenu" aria-label="メニュー">☰</button>
+      <div class="topbar-title">Streamer Activity</div>
+      <div class="topbar-actions"><span class="last-sync" id="lastSync">同期確認中…</span><button class="icon-button" id="collapseMenu" aria-label="サイドバーを閉じる">‹</button></div>
+    </header>
+    <section class="content">
+      <div class="hero"><div><p class="eyebrow">STREAMER ACTIVITY</p><h1>おかえりなさい。</h1><p class="hero-sub">推しの「今」を、ひとつの場所に。</p></div><div class="clock" id="clock">00:00</div></div>
+      <section class="section" id="liveSection"><div class="section-heading"><div><span class="eyebrow">LIVE NOW</span><h2>配信中</h2></div><button class="text-button" data-view="live">すべて見る →</button></div><div class="live-grid" id="liveList"><div class="empty">読み込み中…</div></div></section>
+      <section class="section" id="upcomingSection"><div class="section-heading"><div><span class="eyebrow">UPCOMING</span><h2>配信予定</h2></div><button class="text-button" data-view="upcoming">すべて見る →</button></div><div class="schedule-list" id="upcomingList"><div class="empty">読み込み中…</div></div></section>
+      <section class="section" id="latestSection"><div class="section-heading"><div><span class="eyebrow">LATEST</span><h2>最新情報</h2></div><button class="text-button" data-view="latest">すべて見る →</button></div><div class="latest-list" id="latestList"><div class="empty">読み込み中…</div></div></section>
+    </section>
+  </main>
+</div>
+<script src="./config.js"></script>
+<script src="./app.js"></script>
+</body>
+</html>
