@@ -1,26 +1,11 @@
-create table if not exists public.videos (
-  video_id text primary key,
-  streamer_id text not null,
-  streamer_name text not null,
-  status text not null check (status in ('live','upcoming','video','archive','canceled')),
-  title text not null default '',
-  description text not null default '',
-  published_at timestamptz,
-  scheduled_start_at timestamptz,
-  actual_start_at timestamptz,
-  duration text not null default '',
-  thumbnail text not null default '',
-  url text not null,
-  source text not null default 'youtube',
-  source_updated_at timestamptz,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
-);
-create index if not exists videos_status_idx on public.videos(status);
-create index if not exists videos_scheduled_idx on public.videos(scheduled_start_at);
-create index if not exists videos_published_idx on public.videos(published_at desc);
-alter table public.videos enable row level security;
-drop policy if exists "public can read videos" on public.videos;
-create policy "public can read videos" on public.videos for select to anon, authenticated using (true);
-create or replace view public.stac_home as select * from public.videos where status <> 'canceled';
-grant select on public.stac_home to anon, authenticated;
+create table if not exists public.streamers(id text primary key,name text not null,channel_id text not null unique,thumbnail text,enabled boolean not null default true,created_at timestamptz default now(),updated_at timestamptz default now());
+create table if not exists public.user_streamers(user_id uuid references auth.users(id) on delete cascade,streamer_id text references public.streamers(id) on delete cascade,enabled boolean default true,created_at timestamptz default now(),primary key(user_id,streamer_id));
+create table if not exists public.videos(video_id text primary key,streamer_id text references public.streamers(id) on delete cascade,streamer_name text,status text,title text,description text,published_at timestamptz,scheduled_at timestamptz,actual_start_at timestamptz,actual_end_at timestamptz,duration integer,thumbnail text,url text,created_at timestamptz default now(),updated_at timestamptz default now());
+alter table public.streamers enable row level security; alter table public.user_streamers enable row level security; alter table public.videos enable row level security;
+drop policy if exists "streamers public select" on public.streamers; create policy "streamers public select" on public.streamers for select using(true);
+drop policy if exists "user_streamers own select" on public.user_streamers; create policy "user_streamers own select" on public.user_streamers for select using(auth.uid()=user_id);
+drop policy if exists "user_streamers own insert" on public.user_streamers; create policy "user_streamers own insert" on public.user_streamers for insert with check(auth.uid()=user_id);
+drop policy if exists "user_streamers own update" on public.user_streamers; create policy "user_streamers own update" on public.user_streamers for update using(auth.uid()=user_id);
+drop policy if exists "user_streamers own delete" on public.user_streamers; create policy "user_streamers own delete" on public.user_streamers for delete using(auth.uid()=user_id);
+drop policy if exists "videos public select" on public.videos; create policy "videos public select" on public.videos for select using(true);
+create index if not exists idx_videos_streamer_status on public.videos(streamer_id,status);
