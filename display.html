@@ -9,7 +9,8 @@
   <script>
     (() => {
       const saved = localStorage.getItem("stac-theme");
-      document.documentElement.dataset.theme = saved === "light" ? "light" : "dark";
+      document.documentElement.dataset.theme =
+        saved === "light" ? "light" : "dark";
     })();
   </script>
 
@@ -20,6 +21,7 @@
 
 <body>
   <div class="display-app">
+
     <header class="display-header">
       <a class="brand" href="./index.html" aria-label="スト活ホーム">
         <span class="brand-jp">スト活</span>
@@ -27,40 +29,61 @@
       </a>
 
       <div class="header-tools">
-        <button id="display-theme" class="theme-button" type="button" aria-label="テーマを切り替える">
+        <button
+          id="display-theme"
+          class="theme-button"
+          type="button"
+          aria-label="テーマを切り替える"
+        >
           <span class="theme-icon">◐</span>
           <span>テーマ</span>
         </button>
+
         <div class="display-date" id="display-date">----</div>
         <div class="display-clock" id="display-clock">--:--</div>
       </div>
     </header>
 
+
     <main class="display-main">
+
+      <!-- =========================
+           LIVE
+      ========================== -->
       <section class="display-section live-section">
         <div class="section-heading">
           <div>
             <div class="section-label">LIVE / NOW</div>
             <h1>配信中</h1>
           </div>
+
           <div class="section-hint live-hint">LIVE</div>
         </div>
+
         <div id="live-list" class="live-list">
           <div class="empty-state">
             <div class="empty-title">配信を確認中…</div>
-            <div class="empty-sub">YouTubeの最新情報を読み込んでいます</div>
+            <div class="empty-sub">
+              YouTubeの最新情報を読み込んでいます
+            </div>
           </div>
         </div>
       </section>
 
+
+      <!-- =========================
+           UPCOMING
+      ========================== -->
       <section class="display-section upcoming-section">
         <div class="section-heading compact">
           <div>
             <div class="section-label">UP NEXT</div>
             <h2>配信予定</h2>
           </div>
+
           <div class="section-hint">SCHEDULE</div>
         </div>
+
         <div id="upcoming-list" class="upcoming-list">
           <div class="empty-state small">
             <div class="empty-title">読み込み中…</div>
@@ -68,14 +91,20 @@
         </div>
       </section>
 
+
+      <!-- =========================
+           LATEST
+      ========================== -->
       <section class="display-section latest-section">
         <div class="section-heading compact">
           <div>
             <div class="section-label">LATEST</div>
             <h2>最新動画</h2>
           </div>
+
           <div class="section-hint">VIDEOS</div>
         </div>
+
         <div id="latest-list" class="latest-list">
           <div class="empty-state small">
             <div class="empty-title">読み込み中…</div>
@@ -83,51 +112,92 @@
         </div>
       </section>
 
+
+      <!-- =========================
+           X POSTS
+      ========================== -->
       <section class="display-section x-section">
         <div class="section-heading compact">
           <div>
             <div class="section-label">X / POSTS</div>
             <h2>Xの最新ポスト</h2>
           </div>
+
           <div class="section-hint">POSTS</div>
         </div>
 
         <div id="x-post-list" class="x-post-list">
           <div class="empty-state small">
             <div class="empty-title">Xのポストを表示できます</div>
-            <div class="empty-sub">投稿データを接続するとここに表示されます</div>
+            <div class="empty-sub">
+              投稿データを接続するとここに表示されます
+            </div>
           </div>
         </div>
       </section>
+
     </main>
 
+
+    <!-- =========================
+         FOOTER
+    ========================== -->
     <footer class="display-footer">
       <div>
         <span class="footer-dot"></span>
         STAC ONLINE
       </div>
-      <div id="last-updated">最終更新 --:--</div>
-      <div>自動更新 60s</div>
+
+      <div id="last-updated">
+        最終更新 --:--
+      </div>
+
+      <div>
+        自動更新 60s
+      </div>
     </footer>
+
   </div>
 
+
+  <!-- =========================
+       PORTRAIT WARNING
+  ========================== -->
   <div id="portrait-warning" class="portrait-warning">
     <div class="portrait-card">
       <div class="portrait-icon">↔</div>
       <strong>横向き表示がおすすめです</strong>
-      <span>iPadを横向きにするとSTACを広く表示できます。</span>
+      <span>
+        iPadを横向きにするとSTACを広く表示できます。
+      </span>
     </div>
   </div>
 
+
   <script>
+    /* =========================================
+       SETTINGS
+    ========================================= */
+
     const VIDEO_RETENTION_DAYS = 7;
     const LIVE_SLIDE_INTERVAL = 5000;
+
+
+    /* =========================================
+       STATE
+    ========================================= */
 
     let liveSlideTimer = null;
     let liveItems = [];
     let currentLiveIndex = 0;
 
+
+    /* =========================================
+       HELPERS
+    ========================================= */
+
     const $ = (selector) => document.querySelector(selector);
+
 
     function escapeHtml(value) {
       return String(value ?? "")
@@ -138,16 +208,20 @@
         .replaceAll("'", "&#039;");
     }
 
+
     function formatTime(value) {
       if (!value) return "--:--";
+
       return new Date(value).toLocaleTimeString("ja-JP", {
         hour: "2-digit",
         minute: "2-digit"
       });
     }
 
+
     function formatDate(value) {
       if (!value) return "----/--/--";
+
       return new Date(value).toLocaleDateString("ja-JP", {
         month: "numeric",
         day: "numeric",
@@ -155,55 +229,132 @@
       });
     }
 
+
     function getYouTubeUrl(item) {
-      if (item.url) return item.url;
-      return item.video_id ? `https://www.youtube.com/watch?v=${encodeURIComponent(item.video_id)}` : "#";
+      if (item.url) {
+        return item.url;
+      }
+
+      if (item.video_id) {
+        return `https://www.youtube.com/watch?v=${encodeURIComponent(
+          item.video_id
+        )}`;
+      }
+
+      return "#";
     }
 
+
     function getThumbnail(item) {
-      if (item.thumbnail) return item.thumbnail;
-      if (item.video_id) return `https://i.ytimg.com/vi/${encodeURIComponent(item.video_id)}/hqdefault.jpg`;
+      if (item.thumbnail) {
+        return item.thumbnail;
+      }
+
+      if (item.video_id) {
+        return `https://i.ytimg.com/vi/${encodeURIComponent(
+          item.video_id
+        )}/hqdefault.jpg`;
+      }
+
       return "";
     }
 
+
+    /* =========================================
+       THEME
+    ========================================= */
+
     function applyTheme(theme) {
       const next = theme === "light" ? "light" : "dark";
+
       document.documentElement.dataset.theme = next;
       localStorage.setItem("stac-theme", next);
 
       const button = $("#display-theme");
+
       if (button) {
-        button.querySelector(".theme-icon").textContent = next === "light" ? "☼" : "◐";
-        button.querySelector("span:last-child").textContent = next === "light" ? "ライト" : "ダーク";
+        const icon = button.querySelector(".theme-icon");
+        const label = button.querySelector("span:last-child");
+
+        if (icon) {
+          icon.textContent = next === "light" ? "☼" : "◐";
+        }
+
+        if (label) {
+          label.textContent = next === "light"
+            ? "ライト"
+            : "ダーク";
+        }
       }
     }
 
+
     function initTheme() {
-      applyTheme(document.documentElement.dataset.theme || "dark");
+      applyTheme(
+        document.documentElement.dataset.theme || "dark"
+      );
     }
 
-    $("#display-theme")?.addEventListener("click", () => {
-      const current = document.documentElement.dataset.theme;
-      applyTheme(current === "dark" ? "light" : "dark");
-    });
+
+    const themeButton = $("#display-theme");
+
+    if (themeButton) {
+      themeButton.addEventListener("click", () => {
+        const current =
+          document.documentElement.dataset.theme;
+
+        applyTheme(
+          current === "dark"
+            ? "light"
+            : "dark"
+        );
+      });
+    }
+
+
+    /* =========================================
+       CLOCK
+    ========================================= */
 
     function updateClock() {
       const now = new Date();
-      $("#display-date").textContent = now.toLocaleDateString("ja-JP", {
-        year: "numeric",
-        month: "numeric",
-        day: "numeric",
-        weekday: "short"
-      });
-      $("#display-clock").textContent = now.toLocaleTimeString("ja-JP", {
-        hour: "2-digit",
-        minute: "2-digit"
-      });
+
+      const dateElement = $("#display-date");
+      const clockElement = $("#display-clock");
+
+      if (dateElement) {
+        dateElement.textContent =
+          now.toLocaleDateString("ja-JP", {
+            year: "numeric",
+            month: "numeric",
+            day: "numeric",
+            weekday: "short"
+          });
+      }
+
+      if (clockElement) {
+        clockElement.textContent =
+          now.toLocaleTimeString("ja-JP", {
+            hour: "2-digit",
+            minute: "2-digit"
+          });
+      }
     }
 
+
     function setUpdated() {
-      $("#last-updated").textContent = `最終更新 ${formatTime(new Date())}`;
+      const element = $("#last-updated");
+
+      if (element) {
+        element.textContent =
+          `最終更新 ${formatTime(new Date())}`;
+      }
     }
+
+
+    /* =========================================
+       LIVE
+    ========================================= */
 
     function renderLive(items) {
       liveItems = items;
@@ -215,217 +366,647 @@
 
       const container = $("#live-list");
 
+      if (!container) return;
+
+
+      /* 配信なし */
       if (!items.length) {
         container.innerHTML = `
           <div class="empty-state live-empty">
             <div class="empty-orb"></div>
-            <div class="empty-title">現在、配信はありません</div>
-            <div class="empty-sub">配信が始まるとここに表示されます</div>
-          </div>`;
+
+            <div class="empty-title">
+              現在、配信はありません
+            </div>
+
+            <div class="empty-sub">
+              配信が始まるとここに表示されます
+            </div>
+          </div>
+        `;
+
         return;
       }
 
+
+      /* 配信あり */
       currentLiveIndex = 0;
 
+
       const draw = () => {
-        const item = liveItems[currentLiveIndex % liveItems.length];
-        const thumbnail = getThumbnail(item);
+        const item =
+          liveItems[
+            currentLiveIndex % liveItems.length
+          ];
+
+        const thumbnail =
+          getThumbnail(item);
+
 
         container.innerHTML = `
-          <a class="live-card" href="${escapeHtml(getYouTubeUrl(item))}" target="_blank" rel="noopener noreferrer">
+          <a
+            class="live-card"
+            href="${escapeHtml(getYouTubeUrl(item))}"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+
             <div class="live-thumbnail">
-              ${thumbnail ? `<img src="${escapeHtml(thumbnail)}" alt="" loading="eager">` : ""}
+
+              ${
+                thumbnail
+                  ? `
+                    <img
+                      src="${escapeHtml(thumbnail)}"
+                      alt=""
+                      loading="eager"
+                    >
+                  `
+                  : ""
+              }
+
               <div class="live-overlay"></div>
-              <div class="live-badge"><span></span>LIVE</div>
+
+              <div class="live-badge">
+                <span></span>
+                LIVE
+              </div>
+
             </div>
+
+
             <div class="live-info">
-              <div class="streamer-name">${escapeHtml(item.streamer_name || item.streamer_id || "STREAMER")}</div>
-              <div class="live-title">${escapeHtml(item.title || "配信中")}</div>
-              <div class="live-meta">YouTube LIVE</div>
+
+              <div class="streamer-name">
+                ${escapeHtml(
+                  item.streamer_name ||
+                  item.streamer_id ||
+                  "STREAMER"
+                )}
+              </div>
+
+              <div class="live-title">
+                ${escapeHtml(
+                  item.title || "配信中"
+                )}
+              </div>
+
+              <div class="live-meta">
+                YouTube LIVE
+              </div>
+
             </div>
-          </a>`;
+
+          </a>
+        `;
       };
+
 
       draw();
 
+
+      /* 複数配信の場合は5秒ごとに切り替え */
       if (items.length > 1) {
         liveSlideTimer = setInterval(() => {
-          currentLiveIndex = (currentLiveIndex + 1) % liveItems.length;
+          currentLiveIndex =
+            (currentLiveIndex + 1) %
+            liveItems.length;
+
           draw();
         }, LIVE_SLIDE_INTERVAL);
       }
     }
 
+
+    /* =========================================
+       UPCOMING
+    ========================================= */
+
     function renderUpcoming(items) {
       const container = $("#upcoming-list");
+
+      if (!container) return;
+
 
       if (!items.length) {
         container.innerHTML = `
           <div class="empty-state small">
-            <div class="empty-title">配信予定はありません</div>
-            <div class="empty-sub">予定が登録されるとここに表示されます</div>
-          </div>`;
+
+            <div class="empty-title">
+              配信予定はありません
+            </div>
+
+            <div class="empty-sub">
+              予定が登録されるとここに表示されます
+            </div>
+
+          </div>
+        `;
+
         return;
       }
 
-      container.innerHTML = items.slice(0, 6).map(item => `
-        <a class="upcoming-card" href="${escapeHtml(getYouTubeUrl(item))}" target="_blank" rel="noopener noreferrer">
-          <div class="upcoming-time">${formatTime(item.scheduled_at)}</div>
-          <div class="upcoming-body">
-            <div class="upcoming-streamer">${escapeHtml(item.streamer_name || item.streamer_id || "STREAMER")}</div>
-            <div class="upcoming-title">${escapeHtml(item.title || "配信予定")}</div>
-            <div class="upcoming-date">${formatDate(item.scheduled_at)}</div>
-          </div>
-        </a>
-      `).join("");
+
+      container.innerHTML =
+        items.slice(0, 6).map(item => `
+          <a
+            class="upcoming-card"
+            href="${escapeHtml(getYouTubeUrl(item))}"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+
+            <div class="upcoming-time">
+              ${formatTime(item.scheduled_at)}
+            </div>
+
+            <div class="upcoming-body">
+
+              <div class="upcoming-streamer">
+                ${escapeHtml(
+                  item.streamer_name ||
+                  item.streamer_id ||
+                  "STREAMER"
+                )}
+              </div>
+
+              <div class="upcoming-title">
+                ${escapeHtml(
+                  item.title || "配信予定"
+                )}
+              </div>
+
+              <div class="upcoming-date">
+                ${formatDate(item.scheduled_at)}
+              </div>
+
+            </div>
+
+          </a>
+        `).join("");
     }
+
+
+    /* =========================================
+       LATEST
+    ========================================= */
 
     function renderLatest(items) {
       const container = $("#latest-list");
 
+      if (!container) return;
+
+
       if (!items.length) {
         container.innerHTML = `
           <div class="empty-state small">
-            <div class="empty-title">最新動画がありません</div>
-          </div>`;
+
+            <div class="empty-title">
+              最新動画がありません
+            </div>
+
+          </div>
+        `;
+
         return;
       }
 
-      container.innerHTML = items.slice(0, 5).map(item => {
-        const thumbnail = getThumbnail(item);
-        return `
-          <a class="latest-card" href="${escapeHtml(getYouTubeUrl(item))}" target="_blank" rel="noopener noreferrer">
-            <div class="latest-thumb">
-              ${thumbnail ? `<img src="${escapeHtml(thumbnail)}" alt="" loading="lazy">` : ""}
-            </div>
-            <div class="latest-body">
-              <div class="latest-streamer">${escapeHtml(item.streamer_name || item.streamer_id || "STREAMER")}</div>
-              <div class="latest-title">${escapeHtml(item.title || "動画")}</div>
-              <div class="latest-date">${formatDate(item.published_at || item.created_at)}</div>
-            </div>
-          </a>`;
-      }).join("");
+
+      container.innerHTML =
+        items.slice(0, 5).map(item => {
+
+          const thumbnail =
+            getThumbnail(item);
+
+          return `
+            <a
+              class="latest-card"
+              href="${escapeHtml(getYouTubeUrl(item))}"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+
+              <div class="latest-thumb">
+
+                ${
+                  thumbnail
+                    ? `
+                      <img
+                        src="${escapeHtml(thumbnail)}"
+                        alt=""
+                        loading="lazy"
+                      >
+                    `
+                    : ""
+                }
+
+              </div>
+
+
+              <div class="latest-body">
+
+                <div class="latest-streamer">
+                  ${escapeHtml(
+                    item.streamer_name ||
+                    item.streamer_id ||
+                    "STREAMER"
+                  )}
+                </div>
+
+                <div class="latest-title">
+                  ${escapeHtml(
+                    item.title || "動画"
+                  )}
+                </div>
+
+                <div class="latest-date">
+                  ${formatDate(item.published_at)}
+                </div>
+
+              </div>
+
+            </a>
+          `;
+        }).join("");
     }
+
+
+    /* =========================================
+       X POSTS
+    ========================================= */
 
     function renderXPosts(posts = []) {
       const container = $("#x-post-list");
 
+      if (!container) return;
+
+
       if (!posts.length) {
         container.innerHTML = `
           <div class="empty-state small">
+
             <div class="empty-icon">𝕏</div>
-            <div class="empty-title">Xのポストを表示できます</div>
-            <div class="empty-sub">投稿データを接続するとここに表示されます</div>
-          </div>`;
+
+            <div class="empty-title">
+              Xのポストを表示できます
+            </div>
+
+            <div class="empty-sub">
+              投稿データを接続するとここに表示されます
+            </div>
+
+          </div>
+        `;
+
         return;
       }
 
-      container.innerHTML = posts.slice(0, 8).map(post => `
-        <a class="x-post-card" href="${escapeHtml(post.url || "#")}" target="_blank" rel="noopener noreferrer">
-          <div class="x-post-head">
-            <div class="x-avatar">${escapeHtml((post.name || "X").slice(0, 1))}</div>
-            <div class="x-post-user">
-              <strong>${escapeHtml(post.name || post.username || "STREAMER")}</strong>
-              <span>${escapeHtml(post.username ? "@" + post.username : "")}</span>
+
+      container.innerHTML =
+        posts.slice(0, 8).map(post => `
+          <a
+            class="x-post-card"
+            href="${escapeHtml(post.url || "#")}"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+
+            <div class="x-post-head">
+
+              <div class="x-avatar">
+                ${escapeHtml(
+                  (post.name || "X").slice(0, 1)
+                )}
+              </div>
+
+              <div class="x-post-user">
+
+                <strong>
+                  ${escapeHtml(
+                    post.name ||
+                    post.username ||
+                    "STREAMER"
+                  )}
+                </strong>
+
+                <span>
+                  ${escapeHtml(
+                    post.username
+                      ? "@" + post.username
+                      : ""
+                  )}
+                </span>
+
+              </div>
+
+              <div class="x-post-date">
+                ${escapeHtml(post.date || "")}
+              </div>
+
             </div>
-            <div class="x-post-date">${escapeHtml(post.date || "")}</div>
-          </div>
-          <div class="x-post-text">${escapeHtml(post.text || "")}</div>
-          <div class="x-post-link">𝕏で見る ↗</div>
-        </a>
-      `).join("");
+
+            <div class="x-post-text">
+              ${escapeHtml(post.text || "")}
+            </div>
+
+            <div class="x-post-link">
+              𝕏で見る ↗
+            </div>
+
+          </a>
+        `).join("");
     }
 
+
+    /* =========================================
+       SUPABASE
+    ========================================= */
+
     async function loadDisplayData() {
+
       const config = window.STAC_CONFIG;
 
-      if (!config?.SUPABASE_URL || !config?.SUPABASE_PUBLISHABLE_KEY) {
-        console.warn("STAC_CONFIG が見つかりません。");
+
+      /* Config確認 */
+      if (
+        !config?.SUPABASE_URL ||
+        !config?.SUPABASE_PUBLISHABLE_KEY
+      ) {
+
+        console.warn(
+          "STAC_CONFIG が見つかりません。"
+        );
+
         renderLive([]);
         renderUpcoming([]);
         renderLatest([]);
         renderXPosts([]);
+
         return;
       }
 
-      const { createClient } = window.supabase;
+
+      const { createClient } =
+        window.supabase;
+
+
       const client = createClient(
         config.SUPABASE_URL,
         config.SUPABASE_PUBLISHABLE_KEY
       );
 
+
       try {
-        const [{ data: streamers, error: streamerError }, { data: videos, error: videoError }] =
-          await Promise.all([
-            client
-              .from("streamers")
-              .select("id,name,thumbnail,enabled")
-              .eq("enabled", true),
-            client
-              .from("videos")
-              .select(`
-                video_id,
-                streamer_id,
-                streamer_name,
-                status,
-                title,
-                description,
-                published_at,
-                scheduled_at,
-                actual_start_at,
-                duration,
-                thumbnail,
-                url,
-                created_at,
-                updated_at
-              `)
-          ]);
 
-        if (streamerError) throw streamerError;
-        if (videoError) throw videoError;
+        /*
+         * =====================================
+         * streamers
+         *
+         * 実際のテーブル：
+         * id
+         * name
+         * thumbnail
+         * enabled
+         * =====================================
+         */
 
-        const streamerMap = new Map(
-          (streamers || []).map(s => [s.id, s])
-        );
+        const streamersRequest = client
+          .from("streamers")
+          .select(
+            "id,name,thumbnail,enabled"
+          )
+          .eq("enabled", true);
 
-        const enriched = (videos || [])
-          .map(video => {
-            const streamer = streamerMap.get(video.streamer_id);
-            return {
-              ...video,
-              streamer_name: video.streamer_name || streamer?.name || video.streamer_id,
-              thumbnail: video.thumbnail || streamer?.thumbnail || null
-            };
-          });
 
-        const now = Date.now();
-        const retentionMs = VIDEO_RETENTION_DAYS * 24 * 60 * 60 * 1000;
+        /*
+         * =====================================
+         * videos
+         *
+         * 実際のテーブルに存在する列だけ取得
+         *
+         * video_id
+         * streamer_id
+         * status
+         * title
+         * description
+         * published_at
+         * scheduled_at
+         * actual_start_at
+         * thumbnail
+         * url
+         * =====================================
+         */
 
-        const live = enriched.filter(v => v.status === "live");
+        const videosRequest = client
+          .from("videos")
+          .select(`
+            video_id,
+            streamer_id,
+            status,
+            title,
+            description,
+            published_at,
+            scheduled_at,
+            actual_start_at,
+            thumbnail,
+            url
+          `);
 
-        const upcoming = enriched
-          .filter(v => v.status === "upcoming" && v.scheduled_at)
-          .filter(v => new Date(v.scheduled_at).getTime() >= now - 5 * 60 * 1000)
-          .sort((a, b) => new Date(a.scheduled_at) - new Date(b.scheduled_at));
 
-        const latest = enriched
-          .filter(v => ["video", "archive"].includes(v.status))
-          .filter(v => {
-            const date = new Date(v.published_at || v.created_at || 0).getTime();
-            return now - date <= retentionMs;
-          })
-          .sort((a, b) =>
-            new Date(b.published_at || b.created_at) -
-            new Date(a.published_at || a.created_at)
+        const [
+          {
+            data: streamers,
+            error: streamerError
+          },
+          {
+            data: videos,
+            error: videoError
+          }
+        ] = await Promise.all([
+          streamersRequest,
+          videosRequest
+        ]);
+
+
+        /* エラー確認 */
+
+        if (streamerError) {
+          throw streamerError;
+        }
+
+        if (videoError) {
+          throw videoError;
+        }
+
+
+        /* =====================================
+           STREAMER MAP
+        ===================================== */
+
+        const streamerMap =
+          new Map(
+            (streamers || []).map(
+              streamer => [
+                streamer.id,
+                streamer
+              ]
+            )
           );
 
+
+        /* =====================================
+           VIDEO DATAを表示用に加工
+        ===================================== */
+
+        const enriched =
+          (videos || []).map(video => {
+
+            const streamer =
+              streamerMap.get(
+                video.streamer_id
+              );
+
+
+          return {
+            ...video,
+            streamer_name:
+              streamer?.name ||
+              video.streamer_id ||
+              "STREAMER",
+            thumbnail:
+              video.thumbnail || null
+          };
+        });
+
+
+        /* =====================================
+           CURRENT TIME
+        ===================================== */
+        const now = Date.now();
+
+        const retentionMs =
+          VIDEO_RETENTION_DAYS *
+          24 *
+          60 *
+          60 *
+          1000;
+
+
+        /* =====================================
+           LIVE
+        ===================================== */
+
+        const live =
+          enriched.filter(
+            video =>
+              video.status === "live"
+          );
+
+
+        /* =====================================
+           UPCOMING
+        ===================================== */
+
+        const upcoming =
+          enriched
+
+            .filter(
+              video =>
+                video.status === "upcoming" &&
+                video.scheduled_at
+            )
+
+            .filter(
+              video =>
+                new Date(
+                  video.scheduled_at
+                ).getTime()
+                >=
+                now - 5 * 60 * 1000
+            )
+
+            .sort(
+              (a, b) =>
+                new Date(a.scheduled_at) -
+                new Date(b.scheduled_at)
+            );
+
+
+        /* =====================================
+           LATEST
+        ===================================== */
+
+        const latest =
+          enriched
+
+            .filter(
+              video =>
+                ["video", "archive"]
+                  .includes(video.status)
+            )
+
+            .filter(video => {
+
+              const date =
+                new Date(
+                  video.published_at || 0
+                ).getTime();
+
+              return (
+                now - date <=
+                retentionMs
+              );
+            })
+
+            .sort(
+              (a, b) =>
+                new Date(
+                  b.published_at || 0
+                ) -
+                new Date(
+                  a.published_at || 0
+                )
+            );
+
+
+        /* =====================================
+           RENDER
+        ===================================== */
+
         renderLive(live);
+
         renderUpcoming(upcoming);
+
         renderLatest(latest);
+
+        /*
+         * XはまだDB接続前なので
+         * 現在は空表示
+         */
         renderXPosts([]);
+
         setUpdated();
+
+
+        console.log(
+          "STAC display loaded:",
+          {
+            streamers: streamers?.length || 0,
+            videos: videos?.length || 0,
+            live: live.length,
+            upcoming: upcoming.length,
+            latest: latest.length
+          }
+        );
+
       } catch (error) {
-        console.error("STAC display load error:", error);
+
+        console.error(
+          "STAC display load error:",
+          error
+        );
+
+
         renderLive([]);
         renderUpcoming([]);
         renderLatest([]);
@@ -433,11 +1014,32 @@
       }
     }
 
+
+    /* =========================================
+       INITIALIZE
+    ========================================= */
+
     initTheme();
+
     updateClock();
-    setInterval(updateClock, 1000);
+
+    setInterval(
+      updateClock,
+      1000
+    );
+
+
+    /* 初回読み込み */
     loadDisplayData();
-    setInterval(loadDisplayData, 60 * 1000);
+
+
+    /* 60秒ごとに更新 */
+    setInterval(
+      loadDisplayData,
+      60 * 1000
+    );
+
   </script>
+
 </body>
 </html>
