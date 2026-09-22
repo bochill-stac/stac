@@ -792,3 +792,16 @@ button {
 .latest-list::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.38);
 }
+
+/* =========================================
+   iPad FULLSCREEN SAFE AREA
+========================================= */
+
+@media (pointer: coarse) and (hover: none) and (min-width: 700px) {
+
+  :fullscreen .display-app {
+    padding-top: 48px;
+    box-sizing: border-box;
+  }
+
+}
