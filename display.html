@@ -1,176 +1,136 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
-  >
-
-  <title>スト活 Display</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#111214">
-  <link rel="stylesheet" href="display.css">
+  <title>スト活 | STREAMER ACTIVITY</title>
+
   <script>
-    (function () {
-      const theme = localStorage.getItem("stac-theme") === "light" ? "light" : "dark";
-      document.documentElement.dataset.theme = theme;
+    (() => {
+      const saved = localStorage.getItem("stac-theme");
+      document.documentElement.dataset.theme = saved === "light" ? "light" : "dark";
     })();
   </script>
 
-  <!-- Supabase -->
+  <link rel="stylesheet" href="./display.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="config.js"></script>
+  <script src="./config.js"></script>
 </head>
 
 <body>
-
   <div class="display-app">
-
-    <!-- =========================
-         HEADER
-    ========================== -->
     <header class="display-header">
+      <a class="brand" href="./index.html" aria-label="スト活ホーム">
+        <span class="brand-jp">スト活</span>
+        <span class="brand-en">STREAMER ACTIVITY</span>
+      </a>
 
-      <div class="brand">
-        <div class="brand-main">スト活</div>
-        <div class="brand-sub">STREAMER ACTIVITY</div>
+      <div class="header-tools">
+        <button id="display-theme" class="theme-button" type="button" aria-label="テーマを切り替える">
+          <span class="theme-icon">◐</span>
+          <span>テーマ</span>
+        </button>
+        <div class="display-date" id="display-date">----</div>
+        <div class="display-clock" id="display-clock">--:--</div>
       </div>
-
-      <div class="header-right">
-        <button id="display-theme" class="display-theme" type="button">ライト</button>
-        <div id="display-date" class="display-date">----/--/--</div>
-        <div id="display-clock" class="display-clock">--:--</div>
-      </div>
-
     </header>
 
-
-    <!-- =========================
-         MAIN
-    ========================== -->
     <main class="display-main">
-
-      <!-- =========================
-           LIVE
-      ========================== -->
-      <section class="live-section">
-
+      <section class="display-section live-section">
         <div class="section-heading">
           <div>
-            <div class="section-label">NOW LIVE</div>
+            <div class="section-label">LIVE / NOW</div>
             <h1>配信中</h1>
           </div>
-
-          <div id="live-count" class="section-count">
-            0
-          </div>
+          <div class="section-hint live-hint">LIVE</div>
         </div>
-
         <div id="live-list" class="live-list">
-
           <div class="empty-state">
-            <div class="empty-title">現在配信中の配信はありません</div>
-            <div class="empty-sub">
-              次の配信を待っています
-            </div>
+            <div class="empty-title">配信を確認中…</div>
+            <div class="empty-sub">YouTubeの最新情報を読み込んでいます</div>
           </div>
-
         </div>
-
       </section>
 
-
-      <!-- =========================
-           UPCOMING
-      ========================== -->
-      <section class="upcoming-section">
-
+      <section class="display-section upcoming-section">
         <div class="section-heading compact">
-
           <div>
             <div class="section-label">UP NEXT</div>
             <h2>配信予定</h2>
           </div>
-
+          <div class="section-hint">SCHEDULE</div>
         </div>
-
         <div id="upcoming-list" class="upcoming-list">
-
           <div class="empty-state small">
-            <div class="empty-title">配信予定はありません</div>
+            <div class="empty-title">読み込み中…</div>
           </div>
-
         </div>
-
       </section>
 
-
-      <!-- =========================
-           LATEST
-      ========================== -->
-      <section class="latest-section">
-
+      <section class="display-section latest-section">
         <div class="section-heading compact">
-
           <div>
             <div class="section-label">LATEST</div>
-            <h2>最新情報</h2>
+            <h2>最新動画</h2>
           </div>
-
+          <div class="section-hint">VIDEOS</div>
         </div>
-
         <div id="latest-list" class="latest-list">
-
           <div class="empty-state small">
-            <div class="empty-title">最新情報を読み込んでいます…</div>
+            <div class="empty-title">読み込み中…</div>
           </div>
-
         </div>
-
       </section>
 
+      <section class="display-section x-section">
+        <div class="section-heading compact">
+          <div>
+            <div class="section-label">X / POSTS</div>
+            <h2>Xの最新ポスト</h2>
+          </div>
+          <div class="section-hint">POSTS</div>
+        </div>
+
+        <div id="x-post-list" class="x-post-list">
+          <div class="empty-state small">
+            <div class="empty-title">Xのポストを表示できます</div>
+            <div class="empty-sub">投稿データを接続するとここに表示されます</div>
+          </div>
+        </div>
+      </section>
     </main>
 
-
-    <!-- =========================
-         FOOTER
-    ========================== -->
     <footer class="display-footer">
-
-      <div class="footer-status">
-        <span class="status-dot"></span>
-        <span id="sync-status">STAC ONLINE</span>
+      <div>
+        <span class="footer-dot"></span>
+        STAC ONLINE
       </div>
-
-      <div class="footer-right">
-        <span>自動更新</span>
-        <span id="last-updated">--:--</span>
-      </div>
-
+      <div id="last-updated">最終更新 --:--</div>
+      <div>自動更新 60s</div>
     </footer>
-
   </div>
 
+  <div id="portrait-warning" class="portrait-warning">
+    <div class="portrait-card">
+      <div class="portrait-icon">↔</div>
+      <strong>横向き表示がおすすめです</strong>
+      <span>iPadを横向きにするとSTACを広く表示できます。</span>
+    </div>
+  </div>
 
-  <!-- =========================
-       DISPLAY SCRIPT
-  ========================== -->
   <script>
+    const VIDEO_RETENTION_DAYS = 7;
+    const LIVE_SLIDE_INTERVAL = 5000;
 
-    const supabaseClient = window.supabase.createClient(
-      window.STAC_CONFIG.SUPABASE_URL,
-      window.STAC_CONFIG.SUPABASE_PUBLISHABLE_KEY
-    );
+    let liveSlideTimer = null;
+    let liveItems = [];
+    let currentLiveIndex = 0;
 
-
-    /* ========================================
-       Utility
-    ======================================== */
+    const $ = (selector) => document.querySelector(selector);
 
     function escapeHtml(value) {
-      if (value == null) return "";
-
-      return String(value)
+      return String(value ?? "")
         .replaceAll("&", "&amp;")
         .replaceAll("<", "&lt;")
         .replaceAll(">", "&gt;")
@@ -178,491 +138,306 @@
         .replaceAll("'", "&#039;");
     }
 
-
     function formatTime(value) {
-
       if (!value) return "--:--";
-
-      const date = new Date(value);
-
-      return date.toLocaleTimeString("ja-JP", {
+      return new Date(value).toLocaleTimeString("ja-JP", {
         hour: "2-digit",
         minute: "2-digit"
       });
-
     }
 
-
     function formatDate(value) {
-
-      if (!value) return "";
-
-      const date = new Date(value);
-
-      return date.toLocaleDateString("ja-JP", {
+      if (!value) return "----/--/--";
+      return new Date(value).toLocaleDateString("ja-JP", {
         month: "numeric",
         day: "numeric",
         weekday: "short"
       });
-
     }
 
+    function getYouTubeUrl(item) {
+      if (item.url) return item.url;
+      return item.video_id ? `https://www.youtube.com/watch?v=${encodeURIComponent(item.video_id)}` : "#";
+    }
 
-    function getThumbnail(video) {
-
-      if (video.thumbnail) {
-        return video.thumbnail;
-      }
-
-      if (video.video_id) {
-        return `https://i.ytimg.com/vi/${video.video_id}/hqdefault.jpg`;
-      }
-
+    function getThumbnail(item) {
+      if (item.thumbnail) return item.thumbnail;
+      if (item.video_id) return `https://i.ytimg.com/vi/${encodeURIComponent(item.video_id)}/hqdefault.jpg`;
       return "";
     }
 
+    function applyTheme(theme) {
+      const next = theme === "light" ? "light" : "dark";
+      document.documentElement.dataset.theme = next;
+      localStorage.setItem("stac-theme", next);
 
-    /* ========================================
-       Clock
-    ======================================== */
+      const button = $("#display-theme");
+      if (button) {
+        button.querySelector(".theme-icon").textContent = next === "light" ? "☼" : "◐";
+        button.querySelector("span:last-child").textContent = next === "light" ? "ライト" : "ダーク";
+      }
+    }
+
+    function initTheme() {
+      applyTheme(document.documentElement.dataset.theme || "dark");
+    }
+
+    $("#display-theme")?.addEventListener("click", () => {
+      const current = document.documentElement.dataset.theme;
+      applyTheme(current === "dark" ? "light" : "dark");
+    });
 
     function updateClock() {
-
       const now = new Date();
-
-      document.getElementById("display-clock").textContent =
-        now.toLocaleTimeString("ja-JP", {
-          hour: "2-digit",
-          minute: "2-digit"
-        });
-
-      document.getElementById("display-date").textContent =
-        now.toLocaleDateString("ja-JP", {
-          year: "numeric",
-          month: "numeric",
-          day: "numeric",
-          weekday: "short"
-        });
-
+      $("#display-date").textContent = now.toLocaleDateString("ja-JP", {
+        year: "numeric",
+        month: "numeric",
+        day: "numeric",
+        weekday: "short"
+      });
+      $("#display-clock").textContent = now.toLocaleTimeString("ja-JP", {
+        hour: "2-digit",
+        minute: "2-digit"
+      });
     }
 
-    updateClock();
+    function setUpdated() {
+      $("#last-updated").textContent = `最終更新 ${formatTime(new Date())}`;
+    }
 
-    setInterval(updateClock, 1000);
+    function renderLive(items) {
+      liveItems = items;
 
+      if (liveSlideTimer) {
+        clearInterval(liveSlideTimer);
+        liveSlideTimer = null;
+      }
 
-    /* ========================================
-       Load data
-    ======================================== */
+      const container = $("#live-list");
+
+      if (!items.length) {
+        container.innerHTML = `
+          <div class="empty-state live-empty">
+            <div class="empty-orb"></div>
+            <div class="empty-title">現在、配信はありません</div>
+            <div class="empty-sub">配信が始まるとここに表示されます</div>
+          </div>`;
+        return;
+      }
+
+      currentLiveIndex = 0;
+
+      const draw = () => {
+        const item = liveItems[currentLiveIndex % liveItems.length];
+        const thumbnail = getThumbnail(item);
+
+        container.innerHTML = `
+          <a class="live-card" href="${escapeHtml(getYouTubeUrl(item))}" target="_blank" rel="noopener noreferrer">
+            <div class="live-thumbnail">
+              ${thumbnail ? `<img src="${escapeHtml(thumbnail)}" alt="" loading="eager">` : ""}
+              <div class="live-overlay"></div>
+              <div class="live-badge"><span></span>LIVE</div>
+            </div>
+            <div class="live-info">
+              <div class="streamer-name">${escapeHtml(item.streamer_name || item.streamer_id || "STREAMER")}</div>
+              <div class="live-title">${escapeHtml(item.title || "配信中")}</div>
+              <div class="live-meta">YouTube LIVE</div>
+            </div>
+          </a>`;
+      };
+
+      draw();
+
+      if (items.length > 1) {
+        liveSlideTimer = setInterval(() => {
+          currentLiveIndex = (currentLiveIndex + 1) % liveItems.length;
+          draw();
+        }, LIVE_SLIDE_INTERVAL);
+      }
+    }
+
+    function renderUpcoming(items) {
+      const container = $("#upcoming-list");
+
+      if (!items.length) {
+        container.innerHTML = `
+          <div class="empty-state small">
+            <div class="empty-title">配信予定はありません</div>
+            <div class="empty-sub">予定が登録されるとここに表示されます</div>
+          </div>`;
+        return;
+      }
+
+      container.innerHTML = items.slice(0, 6).map(item => `
+        <a class="upcoming-card" href="${escapeHtml(getYouTubeUrl(item))}" target="_blank" rel="noopener noreferrer">
+          <div class="upcoming-time">${formatTime(item.scheduled_at)}</div>
+          <div class="upcoming-body">
+            <div class="upcoming-streamer">${escapeHtml(item.streamer_name || item.streamer_id || "STREAMER")}</div>
+            <div class="upcoming-title">${escapeHtml(item.title || "配信予定")}</div>
+            <div class="upcoming-date">${formatDate(item.scheduled_at)}</div>
+          </div>
+        </a>
+      `).join("");
+    }
+
+    function renderLatest(items) {
+      const container = $("#latest-list");
+
+      if (!items.length) {
+        container.innerHTML = `
+          <div class="empty-state small">
+            <div class="empty-title">最新動画がありません</div>
+          </div>`;
+        return;
+      }
+
+      container.innerHTML = items.slice(0, 5).map(item => {
+        const thumbnail = getThumbnail(item);
+        return `
+          <a class="latest-card" href="${escapeHtml(getYouTubeUrl(item))}" target="_blank" rel="noopener noreferrer">
+            <div class="latest-thumb">
+              ${thumbnail ? `<img src="${escapeHtml(thumbnail)}" alt="" loading="lazy">` : ""}
+            </div>
+            <div class="latest-body">
+              <div class="latest-streamer">${escapeHtml(item.streamer_name || item.streamer_id || "STREAMER")}</div>
+              <div class="latest-title">${escapeHtml(item.title || "動画")}</div>
+              <div class="latest-date">${formatDate(item.published_at || item.created_at)}</div>
+            </div>
+          </a>`;
+      }).join("");
+    }
+
+    function renderXPosts(posts = []) {
+      const container = $("#x-post-list");
+
+      if (!posts.length) {
+        container.innerHTML = `
+          <div class="empty-state small">
+            <div class="empty-icon">𝕏</div>
+            <div class="empty-title">Xのポストを表示できます</div>
+            <div class="empty-sub">投稿データを接続するとここに表示されます</div>
+          </div>`;
+        return;
+      }
+
+      container.innerHTML = posts.slice(0, 8).map(post => `
+        <a class="x-post-card" href="${escapeHtml(post.url || "#")}" target="_blank" rel="noopener noreferrer">
+          <div class="x-post-head">
+            <div class="x-avatar">${escapeHtml((post.name || "X").slice(0, 1))}</div>
+            <div class="x-post-user">
+              <strong>${escapeHtml(post.name || post.username || "STREAMER")}</strong>
+              <span>${escapeHtml(post.username ? "@" + post.username : "")}</span>
+            </div>
+            <div class="x-post-date">${escapeHtml(post.date || "")}</div>
+          </div>
+          <div class="x-post-text">${escapeHtml(post.text || "")}</div>
+          <div class="x-post-link">𝕏で見る ↗</div>
+        </a>
+      `).join("");
+    }
 
     async function loadDisplayData() {
+      const config = window.STAC_CONFIG;
+
+      if (!config?.SUPABASE_URL || !config?.SUPABASE_PUBLISHABLE_KEY) {
+        console.warn("STAC_CONFIG が見つかりません。");
+        renderLive([]);
+        renderUpcoming([]);
+        renderLatest([]);
+        renderXPosts([]);
+        return;
+      }
+
+      const { createClient } = window.supabase;
+      const client = createClient(
+        config.SUPABASE_URL,
+        config.SUPABASE_PUBLISHABLE_KEY
+      );
 
       try {
+        const [{ data: streamers, error: streamerError }, { data: videos, error: videoError }] =
+          await Promise.all([
+            client
+              .from("streamers")
+              .select("id,name,thumbnail,enabled")
+              .eq("enabled", true),
+            client
+              .from("videos")
+              .select(`
+                video_id,
+                streamer_id,
+                streamer_name,
+                status,
+                title,
+                description,
+                published_at,
+                scheduled_at,
+                actual_start_at,
+                duration,
+                thumbnail,
+                url,
+                created_at,
+                updated_at
+              `)
+          ]);
 
-        const { data: streamers, error: streamerError } =
-          await supabaseClient
-            .from("streamers")
-            .select("*")
-            .eq("enabled", true)
-            .order("name");
+        if (streamerError) throw streamerError;
+        if (videoError) throw videoError;
 
-        if (streamerError) {
-          throw streamerError;
-        }
-
-
-        const streamerIds =
-          (streamers || []).map(streamer => streamer.id);
-
-
-        if (streamerIds.length === 0) {
-
-          renderEverything([], [], []);
-
-          return;
-        }
-
-
-        const { data: videos, error: videoError } =
-          await supabaseClient
-            .from("videos")
-            .select("*")
-            .in("streamer_id", streamerIds)
-            .order("scheduled_at", {
-              ascending: true,
-              nullsFirst: false
-            });
-
-        if (videoError) {
-          throw videoError;
-        }
-
-
-        const now = Date.now();
-
-
-        const live = (videos || []).filter(video => {
-
-          return video.status === "live";
-
-        });
-
-
-        const upcoming = (videos || [])
-          .filter(video => {
-
-            if (video.status !== "upcoming") {
-              return false;
-            }
-
-            if (!video.scheduled_at) {
-              return false;
-            }
-
-            return new Date(video.scheduled_at).getTime() >= now;
-
-          })
-          .sort((a, b) => {
-
-            return new Date(a.scheduled_at) -
-              new Date(b.scheduled_at);
-
-          })
-          .slice(0, 6);
-
-
-        const latest = (videos || [])
-          .filter(video => {
-
-            return (
-              video.status === "video" ||
-              video.status === "archive"
-            );
-
-          })
-          .sort((a, b) => {
-
-            return new Date(
-              b.published_at || b.created_at
-            ) -
-            new Date(
-              a.published_at || a.created_at
-            );
-
-          })
-          .slice(0, 6);
-
-
-        renderEverything(
-          live,
-          upcoming,
-          latest
+        const streamerMap = new Map(
+          (streamers || []).map(s => [s.id, s])
         );
 
+        const enriched = (videos || [])
+          .map(video => {
+            const streamer = streamerMap.get(video.streamer_id);
+            return {
+              ...video,
+              streamer_name: video.streamer_name || streamer?.name || video.streamer_id,
+              thumbnail: video.thumbnail || streamer?.thumbnail || null
+            };
+          });
 
-        document.getElementById("sync-status")
-          .textContent = "STAC ONLINE";
+        const now = Date.now();
+        const retentionMs = VIDEO_RETENTION_DAYS * 24 * 60 * 60 * 1000;
 
-        document.getElementById("last-updated")
-          .textContent = formatTime(new Date());
+        const live = enriched.filter(v => v.status === "live");
 
+        const upcoming = enriched
+          .filter(v => v.status === "upcoming" && v.scheduled_at)
+          .filter(v => new Date(v.scheduled_at).getTime() >= now - 5 * 60 * 1000)
+          .sort((a, b) => new Date(a.scheduled_at) - new Date(b.scheduled_at));
 
+        const latest = enriched
+          .filter(v => ["video", "archive"].includes(v.status))
+          .filter(v => {
+            const date = new Date(v.published_at || v.created_at || 0).getTime();
+            return now - date <= retentionMs;
+          })
+          .sort((a, b) =>
+            new Date(b.published_at || b.created_at) -
+            new Date(a.published_at || a.created_at)
+          );
+
+        renderLive(live);
+        renderUpcoming(upcoming);
+        renderLatest(latest);
+        renderXPosts([]);
+        setUpdated();
       } catch (error) {
-
-        console.error("STAC Display error:", error);
-
-        document.getElementById("sync-status")
-          .textContent = "SYNC ERROR";
-
+        console.error("STAC display load error:", error);
+        renderLive([]);
+        renderUpcoming([]);
+        renderLatest([]);
+        renderXPosts([]);
       }
-
     }
 
-
-    /* ========================================
-       Render
-    ======================================== */
-
-    function renderEverything(
-      live,
-      upcoming,
-      latest
-    ) {
-
-      renderLive(live);
-      renderUpcoming(upcoming);
-      renderLatest(latest);
-
-    }
-
-
-    /* ========================================
-       Live
-    ======================================== */
-
-    function renderLive(live) {
-
-      const container =
-        document.getElementById("live-list");
-
-      const count =
-        document.getElementById("live-count");
-
-
-      count.textContent = live.length;
-
-
-      if (!live.length) {
-
-        container.innerHTML = `
-          <div class="empty-state">
-            <div class="empty-title">
-              現在配信中の配信はありません
-            </div>
-            <div class="empty-sub">
-              次の配信を待っています
-            </div>
-          </div>
-        `;
-
-        return;
-      }
-
-
-      container.innerHTML =
-        live.map(video => {
-
-          const thumbnail =
-            getThumbnail(video);
-
-          return `
-            <a
-              class="live-card"
-              href="${escapeHtml(video.url || "#")}"
-              target="_blank"
-              rel="noopener"
-            >
-
-              <div class="live-thumbnail">
-
-                ${
-                  thumbnail
-                    ? `<img
-                        src="${escapeHtml(thumbnail)}"
-                        alt=""
-                        loading="lazy"
-                      >`
-                    : ""
-                }
-
-                <div class="live-overlay">
-
-                  <span class="live-badge">
-                    LIVE
-                  </span>
-
-                </div>
-
-              </div>
-
-
-              <div class="live-info">
-
-                <div class="streamer-name">
-                  ${escapeHtml(video.streamer_name)}
-                </div>
-
-                <div class="live-title">
-                  ${escapeHtml(video.title)}
-                </div>
-
-              </div>
-
-            </a>
-          `;
-
-        }).join("");
-
-    }
-
-
-    /* ========================================
-       Upcoming
-    ======================================== */
-
-    function renderUpcoming(upcoming) {
-
-      const container =
-        document.getElementById("upcoming-list");
-
-
-      if (!upcoming.length) {
-
-        container.innerHTML = `
-          <div class="empty-state small">
-            <div class="empty-title">
-              配信予定はありません
-            </div>
-          </div>
-        `;
-
-        return;
-      }
-
-
-      container.innerHTML =
-        upcoming.map(video => {
-
-          return `
-            <a
-              class="upcoming-card"
-              href="${escapeHtml(video.url || "#")}"
-              target="_blank"
-              rel="noopener"
-            >
-
-              <div class="upcoming-time">
-
-                <div class="upcoming-date">
-                  ${escapeHtml(
-                    formatDate(video.scheduled_at)
-                  )}
-                </div>
-
-                <div class="upcoming-clock">
-                  ${escapeHtml(
-                    formatTime(video.scheduled_at)
-                  )}
-                </div>
-
-              </div>
-
-
-              <div class="upcoming-line"></div>
-
-
-              <div class="upcoming-info">
-
-                <div class="streamer-name">
-                  ${escapeHtml(video.streamer_name)}
-                </div>
-
-                <div class="upcoming-title">
-                  ${escapeHtml(video.title)}
-                </div>
-
-              </div>
-
-            </a>
-          `;
-
-        }).join("");
-
-    }
-
-
-    /* ========================================
-       Latest
-    ======================================== */
-
-    function renderLatest(latest) {
-
-      const container =
-        document.getElementById("latest-list");
-
-
-      if (!latest.length) {
-
-        container.innerHTML = `
-          <div class="empty-state small">
-            <div class="empty-title">
-              最新情報はありません
-            </div>
-          </div>
-        `;
-
-        return;
-      }
-
-
-      container.innerHTML =
-        latest.map(video => {
-
-          const thumbnail =
-            getThumbnail(video);
-
-
-          return `
-            <a
-              class="latest-card"
-              href="${escapeHtml(video.url || "#")}"
-              target="_blank"
-              rel="noopener"
-            >
-
-              <div class="latest-thumbnail">
-
-                ${
-                  thumbnail
-                    ? `<img
-                        src="${escapeHtml(thumbnail)}"
-                        alt=""
-                        loading="lazy"
-                      >`
-                    : ""
-                }
-
-              </div>
-
-
-              <div class="latest-info">
-
-                <div class="streamer-name">
-                  ${escapeHtml(video.streamer_name)}
-                </div>
-
-                <div class="latest-title">
-                  ${escapeHtml(video.title)}
-                </div>
-
-                <div class="latest-date">
-                  ${
-                    formatDate(
-                      video.published_at ||
-                      video.created_at
-                    )
-                  }
-                </div>
-
-              </div>
-
-            </a>
-          `;
-
-        }).join("");
-
-    }
-
-
-    /* ========================================
-       Start
-    ======================================== */
-
+    initTheme();
+    updateClock();
+    setInterval(updateClock, 1000);
     loadDisplayData();
-
-
-    /*
-      iPad用なので1分ごとに更新。
-      GitHub Actions側のYouTube同期も
-      5分おきなので、このくらいで十分。
-    */
-
-    setInterval(
-      loadDisplayData,
-      60 * 1000
-    );
-
+    setInterval(loadDisplayData, 60 * 1000);
   </script>
-
 </body>
 </html>
