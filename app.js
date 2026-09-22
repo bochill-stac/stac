@@ -1,8 +1,12 @@
 const CONFIG = window.STAC_CONFIG || {};
 const $ = (selector) => document.querySelector(selector);
 const esc = (value) =>
-  String(value ?? "").replace(/[&<>"']/g, (c) =>
-    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c],
+  String(value ?? "").replace(
+    /[&<>"']/g,
+    (c) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[
+        c
+      ],
   );
 
 const THEME_KEY = "stac-theme";
@@ -32,21 +36,31 @@ function platformOf(video) {
   const source = String(video.source || video.platform || "").toLowerCase();
   const url = String(video.url || "").toLowerCase();
   if (source.includes("twitch") || url.includes("twitch.tv")) return "twitch";
-  if (source.includes("x") || url.includes("x.com") || url.includes("twitter.com")) return "x";
+  if (
+    source.includes("x") ||
+    url.includes("x.com") ||
+    url.includes("twitter.com")
+  )
+    return "x";
   return "youtube";
 }
 
 function platformMark(video) {
   const platform = platformOf(video);
-  if (platform === "twitch") return '<span class="platform-mark twitch">T</span>';
-  if (platform === "x") return '<span class="platform-mark" style="background:#111">X</span>';
+  if (platform === "twitch")
+    return '<span class="platform-mark twitch">T</span>';
+  if (platform === "x")
+    return '<span class="platform-mark" style="background:#111">X</span>';
   return '<span class="platform-mark">▶</span>';
 }
 
 function fmtClock(value) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "--:--";
-  return date.toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" });
+  return date.toLocaleTimeString("ja-JP", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 function fmtDay(value) {
@@ -72,13 +86,16 @@ function timeSlot(value) {
   return "18:00 - 00:00";
 }
 
-function openUrl(url) {
-  if (url) window.open(url, "_blank", "noopener,noreferrer");
-}
+function openUrl(url, videoId = "") {
+  let target = String(url || "").trim();
 
-/* Theme */
-function currentTheme() {
-  return localStorage.getItem(THEME_KEY) === "light" ? "light" : "dark";
+  if (!target && videoId) {
+    target = `https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}`;
+  }
+
+  if (!target) return;
+
+  window.open(target, "_blank", "noopener,noreferrer");
 }
 
 function applyTheme(theme) {
@@ -111,10 +128,12 @@ function showAuthMessage(message) {
 }
 
 async function login() {
-  if (!supabaseClient) return showAuthMessage("Supabaseの設定を確認してください。");
+  if (!supabaseClient)
+    return showAuthMessage("Supabaseの設定を確認してください。");
   const id = $("#authId")?.value.trim();
   const password = $("#authPassword")?.value || "";
-  if (!id || !password) return showAuthMessage("IDとパスワードを入力してください。");
+  if (!id || !password)
+    return showAuthMessage("IDとパスワードを入力してください。");
   try {
     const { data, error } = await supabaseClient.auth.signInWithPassword({
       email: idToEmail(id),
@@ -125,18 +144,22 @@ async function login() {
     await startApp();
   } catch (error) {
     console.error(error);
-    showAuthMessage("ログインできませんでした。IDまたはパスワードを確認してください。");
+    showAuthMessage(
+      "ログインできませんでした。IDまたはパスワードを確認してください。",
+    );
   }
 }
 
 async function signup() {
-  if (!supabaseClient) return showAuthMessage("Supabaseの設定を確認してください。");
+  if (!supabaseClient)
+    return showAuthMessage("Supabaseの設定を確認してください。");
   const id = $("#authId")?.value.trim();
   const password = $("#authPassword")?.value || "";
   if (!/^[a-zA-Z0-9_-]{3,24}$/.test(id)) {
     return showAuthMessage("IDは3〜24文字の英数字・_・-で入力してください。");
   }
-  if (password.length < 6) return showAuthMessage("パスワードは6文字以上にしてください。");
+  if (password.length < 6)
+    return showAuthMessage("パスワードは6文字以上にしてください。");
   try {
     const { data, error } = await supabaseClient.auth.signUp({
       email: idToEmail(id),
@@ -150,8 +173,14 @@ async function signup() {
     }
   } catch (error) {
     console.error(error);
-    const already = String(error.message || "").toLowerCase().includes("already registered");
-    showAuthMessage(already ? "そのIDはすでに使われています。" : error.message || "作成できませんでした。");
+    const already = String(error.message || "")
+      .toLowerCase()
+      .includes("already registered");
+    showAuthMessage(
+      already
+        ? "そのIDはすでに使われています。"
+        : error.message || "作成できませんでした。",
+    );
   }
 }
 
@@ -163,7 +192,8 @@ async function startApp() {
     currentUser?.email?.split("@")[0] ||
     "---";
   if ($("#userName")) $("#userName").textContent = username;
-  if ($("#userMark")) $("#userMark").textContent = username.charAt(0).toUpperCase();
+  if ($("#userMark"))
+    $("#userMark").textContent = username.charAt(0).toUpperCase();
   if ($("#settingsUserId")) $("#settingsUserId").textContent = username;
   applyTheme(currentTheme());
   await loadStreamers();
@@ -175,7 +205,9 @@ async function loadStreamers() {
   try {
     const { data, error } = await supabaseClient
       .from("user_streamers")
-      .select("streamer_id, enabled, streamers ( id, name, channel_id, thumbnail, enabled )")
+      .select(
+        "streamer_id, enabled, streamers ( id, name, channel_id, thumbnail, enabled )",
+      )
       .eq("user_id", currentUser.id)
       .eq("enabled", true);
     if (error) throw error;
@@ -186,60 +218,135 @@ async function loadStreamers() {
   } catch (error) {
     console.error(error);
     const list = $("#myStreamers");
-    if (list) list.innerHTML = '<div class="empty">ストリーマー情報を取得できませんでした。</div>';
+    if (list)
+      list.innerHTML =
+        '<div class="empty">ストリーマー情報を取得できませんでした。</div>';
   }
 }
 
 async function loadData() {
   if (previewMode) return;
   if (!supabaseClient || !currentUser) return;
+
   if (!myStreamers.length) {
     allVideos = [];
     renderAll();
-    if ($("#lastSync")) $("#lastSync").textContent = "ストリーマー未登録";
+
+    if ($("#lastSync")) {
+      $("#lastSync").textContent = "ストリーマー未登録";
+    }
+
     return;
   }
+
   try {
     const ids = myStreamers.map((streamer) => streamer.id);
+
     const { data, error } = await supabaseClient
       .from("videos")
       .select("*")
       .in("streamer_id", ids)
-      .order("published_at", { ascending: false })
+      .order("published_at", {
+        ascending: false,
+      })
       .limit(300);
+
     if (error) throw error;
-    allVideos = data || [];
+
+    const streamerMap = new Map(
+      myStreamers.map((streamer) => [streamer.id, streamer]),
+    );
+
+    allVideos = (data || []).map((video) => {
+      const streamer = streamerMap.get(video.streamer_id);
+
+      return {
+        ...video,
+
+        // videosテーブルにない情報を
+        // streamersテーブルから補完
+        streamer_name: streamer?.name || "不明なストリーマー",
+
+        // DBにthumbnailがないので
+        // YouTubeのvideo_idから直接生成
+        thumbnail: video.video_id
+          ? `https://i.ytimg.com/vi/${video.video_id}/hqdefault.jpg`
+          : "",
+
+        // DBにurlがないので生成
+        url: video.video_id
+          ? `https://www.youtube.com/watch?v=${video.video_id}`
+          : "",
+      };
+    });
+
     renderAll();
+
     if ($("#lastSync")) {
-      $("#lastSync").textContent = `最終確認 ${new Date().toLocaleTimeString("ja-JP", {
-        hour: "2-digit",
-        minute: "2-digit",
-      })}`;
+      $("#lastSync").textContent = `最終確認 ${new Date().toLocaleTimeString(
+        "ja-JP",
+        {
+          hour: "2-digit",
+          minute: "2-digit",
+        },
+      )}`;
     }
   } catch (error) {
     console.error(error);
-    if ($("#lastSync")) $("#lastSync").textContent = "接続エラー";
+
+    if ($("#lastSync")) {
+      $("#lastSync").textContent = "接続エラー";
+    }
   }
 }
 
 function buckets() {
+  const now = Date.now();
+
+  const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000;
+
   const live = allVideos.filter((video) => video.status === "live");
+
   const upcoming = allVideos
     .filter((video) => video.status === "upcoming")
     .sort((a, b) => new Date(scheduledAt(a)) - new Date(scheduledAt(b)));
+
   const latest = allVideos
-    .filter((video) => video.status === "video" || video.status === "archive")
-    .sort((a, b) => new Date(b.published_at || 0) - new Date(a.published_at || 0));
-  return { live, upcoming, latest };
+    .filter((video) => {
+      if (video.status !== "video" && video.status !== "archive") {
+        return false;
+      }
+
+      const date = new Date(video.published_at || 0).getTime();
+
+      return Number.isFinite(date) && date >= sevenDaysAgo;
+    })
+    .sort(
+      (a, b) => new Date(b.published_at || 0) - new Date(a.published_at || 0),
+    );
+
+  return {
+    live,
+    upcoming,
+    latest,
+  };
 }
 
 function liveCard(video) {
   return `
-    <article class="live-card" data-url="${esc(video.url)}">
-      <div class="live-thumb" style="background-image:url('${esc(video.thumbnail || "")}')">
+    <article
+      class="live-card"
+      data-url="${esc(video.url)}"
+      data-video-id="${esc(video.video_id)}"
+    >
+      <div
+        class="live-thumb"
+        style="background-image:url('${esc(video.thumbnail || "")}')"
+      >
         <span class="live-badge">LIVE</span>
         ${platformMark(video)}
       </div>
+
       <div class="live-body">
         <div class="live-streamer">${esc(video.streamer_name)}</div>
         <div class="live-title">${esc(video.title)}</div>
@@ -250,12 +357,24 @@ function liveCard(video) {
 
 function schedCard(video) {
   const live = video.status === "live";
+
   return `
-    <article class="sched-card${live ? " is-live" : ""}" data-url="${esc(video.url)}">
-      <div class="sched-thumb" style="background-image:url('${esc(video.thumbnail || "")}')">
-        <span class="sched-badge${live ? "" : " upcoming"}">${live ? "LIVE" : "Upcoming"}</span>
+    <article
+      class="sched-card${live ? " is-live" : ""}"
+      data-url="${esc(video.url)}"
+      data-video-id="${esc(video.video_id)}"
+    >
+      <div
+        class="sched-thumb"
+        style="background-image:url('${esc(video.thumbnail || "")}')"
+      >
+        <span class="sched-badge${live ? "" : " upcoming"}">
+          ${live ? "LIVE" : "Upcoming"}
+        </span>
+
         ${platformMark(video)}
       </div>
+
       <div class="sched-meta">
         <div class="sched-title">${esc(video.title)}</div>
         <div class="sched-name">${esc(video.streamer_name)}</div>
@@ -267,13 +386,32 @@ function schedCard(video) {
 
 function latestItem(video) {
   return `
-    <article class="latest-item" data-url="${esc(video.url)}">
-      <div class="latest-thumb">${video.thumbnail ? `<img src="${esc(video.thumbnail)}" alt="" loading="lazy">` : ""}</div>
-      <div>
-        <div class="latest-streamer">${esc(video.streamer_name)}</div>
-        <div class="latest-title">${esc(video.title)}</div>
+    <article
+      class="latest-item"
+      data-url="${esc(video.url)}"
+      data-video-id="${esc(video.video_id)}"
+    >
+      <div class="latest-thumb">
+        ${
+          video.thumbnail
+            ? `<img src="${esc(video.thumbnail)}" alt="" loading="lazy">`
+            : ""
+        }
       </div>
-      <div class="latest-date">${esc(fmtDay(video.published_at))}</div>
+
+      <div>
+        <div class="latest-streamer">
+          ${esc(video.streamer_name)}
+        </div>
+
+        <div class="latest-title">
+          ${esc(video.title)}
+        </div>
+      </div>
+
+      <div class="latest-date">
+        ${esc(fmtDay(video.published_at))}
+      </div>
     </article>
   `;
 }
@@ -298,7 +436,8 @@ function renderSchedule(rows, selector, limit = 0) {
   const byDay = new Map();
   for (const video of items) {
     const key = dayKey(scheduledAt(video));
-    if (!byDay.has(key)) byDay.set(key, { label: fmtDay(scheduledAt(video)), videos: [] });
+    if (!byDay.has(key))
+      byDay.set(key, { label: fmtDay(scheduledAt(video)), videos: [] });
     byDay.get(key).videos.push(video);
   }
   root.innerHTML = [...byDay.values()]
@@ -337,7 +476,9 @@ function renderLatest(rows, selector, limit = 8) {
 
 function bindOpens(root) {
   root.querySelectorAll("[data-url]").forEach((el) => {
-    el.addEventListener("click", () => openUrl(el.dataset.url));
+    el.addEventListener("click", () => {
+      openUrl(el.dataset.url, el.dataset.videoId || "");
+    });
   });
 }
 
@@ -345,7 +486,8 @@ function renderStreamers() {
   const list = $("#myStreamers");
   if (!list) return;
   if (!myStreamers.length) {
-    list.innerHTML = '<div class="empty">登録中のストリーマーはいません。</div>';
+    list.innerHTML =
+      '<div class="empty">登録中のストリーマーはいません。</div>';
     return;
   }
   list.innerHTML = myStreamers
@@ -362,7 +504,9 @@ function renderStreamers() {
     )
     .join("");
   list.querySelectorAll("[data-remove]").forEach((button) => {
-    button.addEventListener("click", () => removeStreamer(button.dataset.remove));
+    button.addEventListener("click", () =>
+      removeStreamer(button.dataset.remove),
+    );
   });
 }
 
@@ -370,7 +514,13 @@ function renderAll() {
   const { live, upcoming, latest } = buckets();
   renderLive(live, "#liveList");
   renderLive(live, "#livePageList");
-  renderSchedule([...live, ...upcoming].sort((a, b) => new Date(scheduledAt(a)) - new Date(scheduledAt(b))), "#upcomingList", 8);
+  renderSchedule(
+    [...live, ...upcoming].sort(
+      (a, b) => new Date(scheduledAt(a)) - new Date(scheduledAt(b)),
+    ),
+    "#upcomingList",
+    8,
+  );
   renderSchedule(upcoming, "#upcomingPageList");
   renderLatest(latest, "#latestList", 8);
   renderLatest(latest, "#latestPageList", 80);
@@ -381,7 +531,9 @@ async function requestAddStreamer(url) {
   const message = $("#addStreamerMessage");
   const button = $("#addStreamerButton");
   if (!value) {
-    if (message) message.textContent = "YouTube / Twitch のURL、または @ハンドルを入力してください。";
+    if (message)
+      message.textContent =
+        "YouTube / Twitch のURL、または @ハンドルを入力してください。";
     return;
   }
   if (button) {
@@ -391,7 +543,8 @@ async function requestAddStreamer(url) {
   if (message) message.textContent = "";
   try {
     const functionUrl = CONFIG.ADD_STREAMER_FUNCTION_URL;
-    if (!functionUrl || !supabaseClient) throw new Error("追加用の設定がありません。");
+    if (!functionUrl || !supabaseClient)
+      throw new Error("追加用の設定がありません。");
     const { data: sessionData } = await supabaseClient.auth.getSession();
     const response = await fetch(functionUrl, {
       method: "POST",
@@ -409,7 +562,8 @@ async function requestAddStreamer(url) {
       payload = {};
     }
     if (!response.ok) throw new Error(payload.error || payload.message || text);
-    if (payload.success === false) throw new Error(payload.message || "追加できませんでした。");
+    if (payload.success === false)
+      throw new Error(payload.message || "追加できませんでした。");
     if ($("#streamerUrl")) $("#streamerUrl").value = "";
     if (message) {
       message.style.color = "var(--text-muted)";
@@ -421,7 +575,8 @@ async function requestAddStreamer(url) {
     console.error(error);
     if (message) {
       message.style.color = "var(--live)";
-      message.textContent = error.message || "ストリーマーを追加できませんでした。";
+      message.textContent =
+        error.message || "ストリーマーを追加できませんでした。";
     }
   } finally {
     if (button) {
@@ -465,7 +620,9 @@ document.querySelectorAll("[data-view]").forEach((el) => {
 const sidebar = $("#sidebar");
 $("#collapseMenu")?.addEventListener("click", () => {
   const collapsed = sidebar.classList.toggle("collapsed");
-  document.querySelector(".main")?.classList.toggle("sidebar-collapsed", collapsed);
+  document
+    .querySelector(".main")
+    ?.classList.toggle("sidebar-collapsed", collapsed);
   $("#collapseMenu").textContent = collapsed ? "›" : "‹";
 });
 
@@ -505,7 +662,9 @@ $("#signupButton")?.addEventListener("click", signup);
 $("#authPassword")?.addEventListener("keydown", (event) => {
   if (event.key === "Enter") login();
 });
-$("#addStreamerButton")?.addEventListener("click", () => requestAddStreamer($("#streamerUrl")?.value));
+$("#addStreamerButton")?.addEventListener("click", () =>
+  requestAddStreamer($("#streamerUrl")?.value),
+);
 $("#streamerUrl")?.addEventListener("keydown", (event) => {
   if (event.key === "Enter") {
     event.preventDefault();
