@@ -324,29 +324,83 @@
       });
     }
 
-    /* =========================================
+/* =========================================
    FULLSCREEN
 ========================================= */
 
 const fullscreenButton = $("#display-fullscreen");
 
+const isIpad =
+  /iPad/.test(navigator.userAgent) ||
+  (
+    navigator.platform === "MacIntel" &&
+    navigator.maxTouchPoints > 1
+  );
+
 if (fullscreenButton) {
   fullscreenButton.addEventListener("click", async () => {
-    try {
-      if (!document.fullscreenElement) {
-        await document.documentElement.requestFullscreen();
-      } else {
-        await document.exitFullscreen();
+
+    /* -----------------------------------------
+       iPad
+       ブラウザのFullscreen APIは使わない
+    ----------------------------------------- */
+
+    if (isIpad) {
+
+      document.documentElement.classList.toggle(
+        "stac-ipad-fullscreen"
+      );
+
+      const label =
+        fullscreenButton.querySelector(
+          "span:last-child"
+        );
+
+      const isFullscreen =
+        document.documentElement.classList.contains(
+          "stac-ipad-fullscreen"
+        );
+
+      if (label) {
+        label.textContent =
+          isFullscreen ? "解除" : "全画面";
       }
+
+      return;
+    }
+
+    /* -----------------------------------------
+       PC
+       通常のFullscreen API
+    ----------------------------------------- */
+
+    try {
+
+      if (!document.fullscreenElement) {
+
+        await document.documentElement.requestFullscreen();
+
+      } else {
+
+        await document.exitFullscreen();
+
+      }
+
     } catch (error) {
+
       console.error(
         "Fullscreen error:",
         error
       );
+
     }
   });
 }
 
+
+/* -----------------------------------------
+   PCのFullscreen状態を監視
+----------------------------------------- */
 
 document.addEventListener(
   "fullscreenchange",
@@ -357,11 +411,6 @@ document.addEventListener(
 
     if (!button) return;
 
-    const icon =
-      button.querySelector(
-        ".fullscreen-icon"
-      );
-
     const label =
       button.querySelector(
         "span:last-child"
@@ -369,19 +418,11 @@ document.addEventListener(
 
     if (document.fullscreenElement) {
 
-      if (icon) {
-        icon.textContent = "⛶";
-      }
-
       if (label) {
         label.textContent = "解除";
       }
 
     } else {
-
-      if (icon) {
-        icon.textContent = "⛶";
-      }
 
       if (label) {
         label.textContent = "全画面";
