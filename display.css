@@ -811,3 +811,45 @@ html.stac-ipad-fullscreen .display-app {
   overflow-y: auto;
   overflow-x: hidden;
 }
+
+/* =========================================
+   PC DISPLAY SIZE ADJUSTMENT
+   ========================================= */
+
+@media (min-width: 1101px) {
+
+  .display-app {
+    font-size: 1.08rem;
+  }
+
+  .display-header {
+    padding: 22px 28px;
+  }
+
+  .brand {
+    font-size: 1.35rem;
+  }
+
+  .header-tools {
+    gap: 14px;
+  }
+
+  .display-section {
+    padding: 22px;
+  }
+
+  .section-title {
+    font-size: 1.05rem;
+  }
+
+  .live-title {
+    font-size: 1.25rem;
+  }
+
+  .upcoming-card,
+  .latest-card,
+  .x-post-card {
+    padding: 16px;
+  }
+
+}
