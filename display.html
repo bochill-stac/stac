@@ -29,19 +29,31 @@
       </a>
 
       <div class="header-tools">
-        <button
-          id="display-theme"
-          class="theme-button"
-          type="button"
-          aria-label="テーマを切り替える"
-        >
-          <span class="theme-icon">◐</span>
-          <span>テーマ</span>
-        </button>
 
-        <div class="display-date" id="display-date">----</div>
-        <div class="display-clock" id="display-clock">--:--</div>
-      </div>
+  <button
+    id="display-fullscreen"
+    class="theme-button"
+    type="button"
+    aria-label="全画面表示"
+  >
+    <span class="fullscreen-icon">⛶</span>
+    <span>全画面</span>
+  </button>
+
+  <button
+    id="display-theme"
+    class="theme-button"
+    type="button"
+    aria-label="テーマを切り替える"
+  >
+    <span class="theme-icon">◐</span>
+    <span>テーマ</span>
+  </button>
+
+  <div class="display-date" id="display-date">----</div>
+  <div class="display-clock" id="display-clock">--:--</div>
+
+</div>
     </header>
 
 
@@ -311,6 +323,73 @@
         );
       });
     }
+
+    /* =========================================
+   FULLSCREEN
+========================================= */
+
+const fullscreenButton = $("#display-fullscreen");
+
+if (fullscreenButton) {
+  fullscreenButton.addEventListener("click", async () => {
+    try {
+      if (!document.fullscreenElement) {
+        await document.documentElement.requestFullscreen();
+      } else {
+        await document.exitFullscreen();
+      }
+    } catch (error) {
+      console.error(
+        "Fullscreen error:",
+        error
+      );
+    }
+  });
+}
+
+
+document.addEventListener(
+  "fullscreenchange",
+  () => {
+
+    const button =
+      $("#display-fullscreen");
+
+    if (!button) return;
+
+    const icon =
+      button.querySelector(
+        ".fullscreen-icon"
+      );
+
+    const label =
+      button.querySelector(
+        "span:last-child"
+      );
+
+    if (document.fullscreenElement) {
+
+      if (icon) {
+        icon.textContent = "⛶";
+      }
+
+      if (label) {
+        label.textContent = "解除";
+      }
+
+    } else {
+
+      if (icon) {
+        icon.textContent = "⛶";
+      }
+
+      if (label) {
+        label.textContent = "全画面";
+      }
+
+    }
+  }
+);
 
 
     /* =========================================
@@ -1022,6 +1101,8 @@
       loadDisplayData,
       60 * 1000
     );
+
+    
 
   </script>
 
