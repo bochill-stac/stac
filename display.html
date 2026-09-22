@@ -181,6 +181,7 @@
 
     const VIDEO_RETENTION_DAYS = 7;
     const LIVE_SLIDE_INTERVAL = 5000;
+    const LIVE_FADE_DURATION = 350;
 
 
     /* =========================================
@@ -356,6 +357,69 @@
        LIVE
     ========================================= */
 
+    function createLiveCard(item) {
+      const thumbnail =
+        getThumbnail(item);
+
+      return `
+        <a
+          class="live-card"
+          href="${escapeHtml(getYouTubeUrl(item))}"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+
+          <div class="live-thumbnail">
+
+            ${
+              thumbnail
+                ? `
+                  <img
+                    src="${escapeHtml(thumbnail)}"
+                    alt=""
+                    loading="eager"
+                  >
+                `
+                : ""
+            }
+
+            <div class="live-overlay"></div>
+
+            <div class="live-badge">
+              <span></span>
+              LIVE
+            </div>
+
+          </div>
+
+
+          <div class="live-info">
+
+            <div class="streamer-name">
+              ${escapeHtml(
+                item.streamer_name ||
+                item.streamer_id ||
+                "STREAMER"
+              )}
+            </div>
+
+            <div class="live-title">
+              ${escapeHtml(
+                item.title || "配信中"
+              )}
+            </div>
+
+            <div class="live-meta">
+              YouTube LIVE
+            </div>
+
+          </div>
+
+        </a>
+      `;
+    }
+
+
     function renderLive(items) {
       liveItems = items;
 
@@ -389,90 +453,77 @@
       }
 
 
-      /* 配信あり */
       currentLiveIndex = 0;
 
 
-      const draw = () => {
+      /* =========================================
+         LIVEカードを表示
+      ========================================= */
+
+      const showLiveCard = () => {
         const item =
           liveItems[
             currentLiveIndex % liveItems.length
           ];
 
-        const thumbnail =
-          getThumbnail(item);
+        container.innerHTML =
+          createLiveCard(item);
 
+        const card =
+          container.querySelector(".live-card");
 
-        container.innerHTML = `
-          <a
-            class="live-card"
-            href="${escapeHtml(getYouTubeUrl(item))}"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+        if (!card) return;
 
-            <div class="live-thumbnail">
-
-              ${
-                thumbnail
-                  ? `
-                    <img
-                      src="${escapeHtml(thumbnail)}"
-                      alt=""
-                      loading="eager"
-                    >
-                  `
-                  : ""
-              }
-
-              <div class="live-overlay"></div>
-
-              <div class="live-badge">
-                <span></span>
-                LIVE
-              </div>
-
-            </div>
-
-
-            <div class="live-info">
-
-              <div class="streamer-name">
-                ${escapeHtml(
-                  item.streamer_name ||
-                  item.streamer_id ||
-                  "STREAMER"
-                )}
-              </div>
-
-              <div class="live-title">
-                ${escapeHtml(
-                  item.title || "配信中"
-                )}
-              </div>
-
-              <div class="live-meta">
-                YouTube LIVE
-              </div>
-
-            </div>
-
-          </a>
-        `;
+        /*
+         * 最初は透明状態。
+         * 次のフレームで表示状態にすることで
+         * CSS transitionを確実に発火させる。
+         */
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            card.classList.add("is-visible");
+          });
+        });
       };
 
 
-      draw();
+      /* =========================================
+         最初の表示
+      ========================================= */
+
+      showLiveCard();
 
 
-      /* 複数配信の場合は5秒ごとに切り替え */
+      /* =========================================
+         複数配信なら5秒ごとにフェード切り替え
+      ========================================= */
+
       if (items.length > 1) {
-        liveSlideTimer = setInterval(() => {
-          currentLiveIndex =
-            (currentLiveIndex + 1) %
-            liveItems.length;
 
-          draw();
+        liveSlideTimer = setInterval(() => {
+
+          const currentCard =
+            container.querySelector(".live-card");
+
+          if (!currentCard) return;
+
+
+          /* 現在のカードをフェードアウト */
+
+          currentCard.classList.remove(
+            "is-visible"
+          );
+
+          setTimeout(() => {
+
+            currentLiveIndex =
+              (currentLiveIndex + 1) %
+              liveItems.length;
+
+            showLiveCard();
+
+          }, LIVE_FADE_DURATION);
+
         }, LIVE_SLIDE_INTERVAL);
       }
     }
@@ -727,7 +778,6 @@
       const config = window.STAC_CONFIG;
 
 
-      /* Config確認 */
       if (
         !config?.SUPABASE_URL ||
         !config?.SUPABASE_PUBLISHABLE_KEY
@@ -758,18 +808,6 @@
 
       try {
 
-        /*
-         * =====================================
-         * streamers
-         *
-         * 実際のテーブル：
-         * id
-         * name
-         * thumbnail
-         * enabled
-         * =====================================
-         */
-
         const streamersRequest = client
           .from("streamers")
           .select(
@@ -777,25 +815,6 @@
           )
           .eq("enabled", true);
 
-
-        /*
-         * =====================================
-         * videos
-         *
-         * 実際のテーブルに存在する列だけ取得
-         *
-         * video_id
-         * streamer_id
-         * status
-         * title
-         * description
-         * published_at
-         * scheduled_at
-         * actual_start_at
-         * thumbnail
-         * url
-         * =====================================
-         */
 
         const videosRequest = client
           .from("videos")
@@ -828,8 +847,6 @@
         ]);
 
 
-        /* エラー確認 */
-
         if (streamerError) {
           throw streamerError;
         }
@@ -838,10 +855,6 @@
           throw videoError;
         }
 
-
-        /* =====================================
-           STREAMER MAP
-        ===================================== */
 
         const streamerMap =
           new Map(
@@ -854,10 +867,6 @@
           );
 
 
-        /* =====================================
-           VIDEO DATAを表示用に加工
-        ===================================== */
-
         const enriched =
           (videos || []).map(video => {
 
@@ -866,22 +875,20 @@
                 video.streamer_id
               );
 
+            return {
+              ...video,
 
-          return {
-            ...video,
-            streamer_name:
-              streamer?.name ||
-              video.streamer_id ||
-              "STREAMER",
-            thumbnail:
-              video.thumbnail || null
-          };
-        });
+              streamer_name:
+                streamer?.name ||
+                video.streamer_id ||
+                "STREAMER",
+
+              thumbnail:
+                video.thumbnail || null
+            };
+          });
 
 
-        /* =====================================
-           CURRENT TIME
-        ===================================== */
         const now = Date.now();
 
         const retentionMs =
@@ -892,20 +899,12 @@
           1000;
 
 
-        /* =====================================
-           LIVE
-        ===================================== */
-
         const live =
           enriched.filter(
             video =>
               video.status === "live"
           );
 
-
-        /* =====================================
-           UPCOMING
-        ===================================== */
 
         const upcoming =
           enriched
@@ -931,10 +930,6 @@
                 new Date(b.scheduled_at)
             );
 
-
-        /* =====================================
-           LATEST
-        ===================================== */
 
         const latest =
           enriched
@@ -969,20 +964,12 @@
             );
 
 
-        /* =====================================
-           RENDER
-        ===================================== */
-
         renderLive(live);
 
         renderUpcoming(upcoming);
 
         renderLatest(latest);
 
-        /*
-         * XはまだDB接続前なので
-         * 現在は空表示
-         */
         renderXPosts([]);
 
         setUpdated();
@@ -1006,7 +993,6 @@
           error
         );
 
-
         renderLive([]);
         renderUpcoming([]);
         renderLatest([]);
@@ -1029,11 +1015,9 @@
     );
 
 
-    /* 初回読み込み */
     loadDisplayData();
 
 
-    /* 60秒ごとに更新 */
     setInterval(
       loadDisplayData,
       60 * 1000
