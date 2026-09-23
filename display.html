@@ -6,6 +6,7 @@
   <meta name="theme-color" content="#111214">
   <title>スト活 | STREAMER ACTIVITY</title>
   <link rel="manifest" href="./display-manifest.json">
+
   <script>
     (() => {
       const saved = localStorage.getItem("stac-theme");
@@ -23,6 +24,7 @@
   <div class="display-app">
 
     <header class="display-header">
+
       <a class="brand" href="./index.html" aria-label="スト活ホーム">
         <span class="brand-jp">スト活</span>
         <span class="brand-en">STREAMER ACTIVITY</span>
@@ -30,30 +32,30 @@
 
       <div class="header-tools">
 
-  <button
-    id="display-fullscreen"
-    class="theme-button"
-    type="button"
-    aria-label="全画面表示"
-  >
-    <span class="fullscreen-icon">⛶</span>
-    <span>全画面</span>
-  </button>
+        <button
+          id="display-fullscreen"
+          class="theme-button"
+          type="button"
+          aria-label="全画面表示"
+        >
+          <span class="fullscreen-icon">⛶</span>
+          <span>全画面</span>
+        </button>
 
-  <button
-    id="display-theme"
-    class="theme-button"
-    type="button"
-    aria-label="テーマを切り替える"
-  >
-    <span class="theme-icon">◐</span>
-    <span>テーマ</span>
-  </button>
+        <button
+          id="display-theme"
+          class="theme-button"
+          type="button"
+          aria-label="テーマを切り替える"
+        >
+          <span class="theme-icon">◐</span>
+          <span>テーマ</span>
+        </button>
 
-  <div class="display-date" id="display-date">----</div>
-  <div class="display-clock" id="display-clock">--:--</div>
+        <div class="display-date" id="display-date">----</div>
+        <div class="display-clock" id="display-clock">--:--</div>
 
-</div>
+      </div>
     </header>
 
 
@@ -63,6 +65,7 @@
            LIVE
       ========================== -->
       <section class="display-section live-section">
+
         <div class="section-heading">
           <div>
             <div class="section-label">LIVE / NOW</div>
@@ -80,6 +83,7 @@
             </div>
           </div>
         </div>
+
       </section>
 
 
@@ -87,6 +91,7 @@
            UPCOMING
       ========================== -->
       <section class="display-section upcoming-section">
+
         <div class="section-heading compact">
           <div>
             <div class="section-label">UP NEXT</div>
@@ -101,6 +106,7 @@
             <div class="empty-title">読み込み中…</div>
           </div>
         </div>
+
       </section>
 
 
@@ -108,6 +114,7 @@
            LATEST
       ========================== -->
       <section class="display-section latest-section">
+
         <div class="section-heading compact">
           <div>
             <div class="section-label">LATEST</div>
@@ -122,6 +129,7 @@
             <div class="empty-title">読み込み中…</div>
           </div>
         </div>
+
       </section>
 
 
@@ -129,6 +137,7 @@
            X POSTS
       ========================== -->
       <section class="display-section x-section">
+
         <div class="section-heading compact">
           <div>
             <div class="section-label">X / POSTS</div>
@@ -140,12 +149,16 @@
 
         <div id="x-post-list" class="x-post-list">
           <div class="empty-state small">
-            <div class="empty-title">Xのポストを表示できます</div>
+            <div class="empty-title">
+              Xのポストを表示できます
+            </div>
+
             <div class="empty-sub">
               投稿データを接続するとここに表示されます
             </div>
           </div>
         </div>
+
       </section>
 
     </main>
@@ -155,6 +168,7 @@
          FOOTER
     ========================== -->
     <footer class="display-footer">
+
       <div>
         <span class="footer-dot"></span>
         STAC ONLINE
@@ -167,6 +181,7 @@
       <div>
         自動更新 60s
       </div>
+
     </footer>
 
   </div>
@@ -176,13 +191,19 @@
        PORTRAIT WARNING
   ========================== -->
   <div id="portrait-warning" class="portrait-warning">
+
     <div class="portrait-card">
       <div class="portrait-icon">↔</div>
-      <strong>横向き表示がおすすめです</strong>
+
+      <strong>
+        横向き表示がおすすめです
+      </strong>
+
       <span>
         iPadを横向きにするとSTACを広く表示できます。
       </span>
     </div>
+
   </div>
 
 
@@ -209,7 +230,8 @@
        HELPERS
     ========================================= */
 
-    const $ = (selector) => document.querySelector(selector);
+    const $ = (selector) =>
+      document.querySelector(selector);
 
 
     function escapeHtml(value) {
@@ -225,21 +247,27 @@
     function formatTime(value) {
       if (!value) return "--:--";
 
-      return new Date(value).toLocaleTimeString("ja-JP", {
-        hour: "2-digit",
-        minute: "2-digit"
-      });
+      return new Date(value).toLocaleTimeString(
+        "ja-JP",
+        {
+          hour: "2-digit",
+          minute: "2-digit"
+        }
+      );
     }
 
 
     function formatDate(value) {
       if (!value) return "----/--/--";
 
-      return new Date(value).toLocaleDateString("ja-JP", {
-        month: "numeric",
-        day: "numeric",
-        weekday: "short"
-      });
+      return new Date(value).toLocaleDateString(
+        "ja-JP",
+        {
+          month: "numeric",
+          day: "numeric",
+          weekday: "short"
+        }
+      );
     }
 
 
@@ -278,25 +306,46 @@
     ========================================= */
 
     function applyTheme(theme) {
-      const next = theme === "light" ? "light" : "dark";
+      const next =
+        theme === "light"
+          ? "light"
+          : "dark";
 
-      document.documentElement.dataset.theme = next;
-      localStorage.setItem("stac-theme", next);
+      document.documentElement.dataset.theme =
+        next;
 
-      const button = $("#display-theme");
+      localStorage.setItem(
+        "stac-theme",
+        next
+      );
+
+      const button =
+        $("#display-theme");
 
       if (button) {
-        const icon = button.querySelector(".theme-icon");
-        const label = button.querySelector("span:last-child");
+
+        const icon =
+          button.querySelector(
+            ".theme-icon"
+          );
+
+        const label =
+          button.querySelector(
+            "span:last-child"
+          );
 
         if (icon) {
-          icon.textContent = next === "light" ? "☼" : "◐";
+          icon.textContent =
+            next === "light"
+              ? "☼"
+              : "◐";
         }
 
         if (label) {
-          label.textContent = next === "light"
-            ? "ライト"
-            : "ダーク";
+          label.textContent =
+            next === "light"
+              ? "ライト"
+              : "ダーク";
         }
       }
     }
@@ -304,135 +353,135 @@
 
     function initTheme() {
       applyTheme(
-        document.documentElement.dataset.theme || "dark"
+        document.documentElement.dataset.theme ||
+        "dark"
       );
     }
 
 
-    const themeButton = $("#display-theme");
+    const themeButton =
+      $("#display-theme");
 
     if (themeButton) {
-      themeButton.addEventListener("click", () => {
-        const current =
-          document.documentElement.dataset.theme;
 
-        applyTheme(
-          current === "dark"
-            ? "light"
-            : "dark"
-        );
-      });
+      themeButton.addEventListener(
+        "click",
+        () => {
+
+          const current =
+            document.documentElement.dataset.theme;
+
+          applyTheme(
+            current === "dark"
+              ? "light"
+              : "dark"
+          );
+
+        }
+      );
     }
 
-/* =========================================
-   FULLSCREEN
-========================================= */
 
-const fullscreenButton = $("#display-fullscreen");
+    /* =========================================
+       FULLSCREEN
+    ========================================= */
 
-function updateFullscreenLabel() {
-  if (!fullscreenButton) return;
+    const fullscreenButton =
+      $("#display-fullscreen");
 
-  const label = fullscreenButton.querySelector(
-    "span:last-child"
-  );
 
-  const isFullscreen =
-    !!document.fullscreenElement ||
-    document.documentElement.classList.contains(
-      "stac-ipad-fullscreen"
+    function updateFullscreenLabel() {
+
+      if (!fullscreenButton) return;
+
+      const label =
+        fullscreenButton.querySelector(
+          "span:last-child"
+        );
+
+      const isFullscreen =
+        !!document.fullscreenElement ||
+        document.documentElement.classList.contains(
+          "stac-ipad-fullscreen"
+        );
+
+      if (label) {
+        label.textContent =
+          isFullscreen
+            ? "解除"
+            : "全画面";
+      }
+    }
+
+
+    if (fullscreenButton) {
+
+      fullscreenButton.addEventListener(
+        "click",
+        async () => {
+
+          try {
+
+            if (
+              document.fullscreenElement
+            ) {
+
+              await document.exitFullscreen();
+
+              updateFullscreenLabel();
+
+              return;
+            }
+
+
+            if (
+              document.documentElement
+                .requestFullscreen
+            ) {
+
+              await document.documentElement
+                .requestFullscreen();
+
+              updateFullscreenLabel();
+
+              return;
+            }
+
+
+            document.documentElement
+              .classList.toggle(
+                "stac-ipad-fullscreen"
+              );
+
+            updateFullscreenLabel();
+
+          } catch (error) {
+
+            console.error(
+              "Fullscreen error:",
+              error
+            );
+
+            document.documentElement
+              .classList.toggle(
+                "stac-ipad-fullscreen"
+              );
+
+            updateFullscreenLabel();
+          }
+
+        }
+      );
+    }
+
+
+    document.addEventListener(
+      "fullscreenchange",
+      updateFullscreenLabel
     );
 
-  if (label) {
-    label.textContent =
-      isFullscreen ? "解除" : "全画面";
-  }
-}
 
-
-if (fullscreenButton) {
-  fullscreenButton.addEventListener("click", async () => {
-
-    try {
-
-      /* -----------------------------------------
-         現在Fullscreenなら解除
-      ----------------------------------------- */
-
-      if (document.fullscreenElement) {
-
-        await document.exitFullscreen();
-
-        updateFullscreenLabel();
-
-        return;
-      }
-
-
-      /* -----------------------------------------
-         Fullscreen APIを使う
-      ----------------------------------------- */
-
-      if (
-        document.documentElement.requestFullscreen
-      ) {
-
-        await document.documentElement.requestFullscreen();
-
-        updateFullscreenLabel();
-
-        return;
-      }
-
-
-      /* -----------------------------------------
-         APIが使えない場合のフォールバック
-         iPad用
-      ----------------------------------------- */
-
-      document.documentElement.classList.toggle(
-        "stac-ipad-fullscreen"
-      );
-
-      updateFullscreenLabel();
-
-    } catch (error) {
-
-      console.error(
-        "Fullscreen error:",
-        error
-      );
-
-      /* -----------------------------------------
-         Safari / iPadでFullscreen APIが
-         拒否された場合もフォールバック
-      ----------------------------------------- */
-
-      document.documentElement.classList.toggle(
-        "stac-ipad-fullscreen"
-      );
-
-      updateFullscreenLabel();
-    }
-  });
-}
-
-
-/* -----------------------------------------
-   Fullscreen状態の監視
------------------------------------------ */
-
-document.addEventListener(
-  "fullscreenchange",
-  updateFullscreenLabel
-);
-
-
-/* -----------------------------------------
-   初期状態
------------------------------------------ */
-
-updateFullscreenLabel();
+    updateFullscreenLabel();
 
 
     /* =========================================
@@ -440,37 +489,57 @@ updateFullscreenLabel();
     ========================================= */
 
     function updateClock() {
-      const now = new Date();
 
-      const dateElement = $("#display-date");
-      const clockElement = $("#display-clock");
+      const now =
+        new Date();
+
+      const dateElement =
+        $("#display-date");
+
+      const clockElement =
+        $("#display-clock");
+
 
       if (dateElement) {
+
         dateElement.textContent =
-          now.toLocaleDateString("ja-JP", {
-            year: "numeric",
-            month: "numeric",
-            day: "numeric",
-            weekday: "short"
-          });
+          now.toLocaleDateString(
+            "ja-JP",
+            {
+              year: "numeric",
+              month: "numeric",
+              day: "numeric",
+              weekday: "short"
+            }
+          );
       }
 
+
       if (clockElement) {
+
         clockElement.textContent =
-          now.toLocaleTimeString("ja-JP", {
-            hour: "2-digit",
-            minute: "2-digit"
-          });
+          now.toLocaleTimeString(
+            "ja-JP",
+            {
+              hour: "2-digit",
+              minute: "2-digit"
+            }
+          );
       }
     }
 
 
     function setUpdated() {
-      const element = $("#last-updated");
+
+      const element =
+        $("#last-updated");
 
       if (element) {
+
         element.textContent =
-          `最終更新 ${formatTime(new Date())}`;
+          `最終更新 ${formatTime(
+            new Date()
+          )}`;
       }
     }
 
@@ -480,13 +549,16 @@ updateFullscreenLabel();
     ========================================= */
 
     function createLiveCard(item) {
+
       const thumbnail =
         getThumbnail(item);
 
       return `
         <a
           class="live-card"
-          href="${escapeHtml(getYouTubeUrl(item))}"
+          href="${escapeHtml(
+            getYouTubeUrl(item)
+          )}"
           target="_blank"
           rel="noopener noreferrer"
         >
@@ -497,7 +569,9 @@ updateFullscreenLabel();
               thumbnail
                 ? `
                   <img
-                    src="${escapeHtml(thumbnail)}"
+                    src="${escapeHtml(
+                      thumbnail
+                    )}"
                     alt=""
                     loading="eager"
                   >
@@ -527,7 +601,8 @@ updateFullscreenLabel();
 
             <div class="live-title">
               ${escapeHtml(
-                item.title || "配信中"
+                item.title ||
+                "配信中"
               )}
             </div>
 
@@ -543,22 +618,30 @@ updateFullscreenLabel();
 
 
     function renderLive(items) {
+
       liveItems = items;
 
       if (liveSlideTimer) {
-        clearInterval(liveSlideTimer);
+
+        clearInterval(
+          liveSlideTimer
+        );
+
         liveSlideTimer = null;
       }
 
-      const container = $("#live-list");
+
+      const container =
+        $("#live-list");
 
       if (!container) return;
 
 
-      /* 配信なし */
       if (!items.length) {
+
         container.innerHTML = `
           <div class="empty-state live-empty">
+
             <div class="empty-orb"></div>
 
             <div class="empty-title">
@@ -568,6 +651,7 @@ updateFullscreenLabel();
             <div class="empty-sub">
               配信が始まるとここに表示されます
             </div>
+
           </div>
         `;
 
@@ -578,75 +662,71 @@ updateFullscreenLabel();
       currentLiveIndex = 0;
 
 
-      /* =========================================
-         LIVEカードを表示
-      ========================================= */
-
       const showLiveCard = () => {
+
         const item =
           liveItems[
-            currentLiveIndex % liveItems.length
+            currentLiveIndex %
+            liveItems.length
           ];
 
         container.innerHTML =
           createLiveCard(item);
 
         const card =
-          container.querySelector(".live-card");
+          container.querySelector(
+            ".live-card"
+          );
 
         if (!card) return;
 
-        /*
-         * 最初は透明状態。
-         * 次のフレームで表示状態にすることで
-         * CSS transitionを確実に発火させる。
-         */
+
         requestAnimationFrame(() => {
+
           requestAnimationFrame(() => {
-            card.classList.add("is-visible");
+
+            card.classList.add(
+              "is-visible"
+            );
+
           });
+
         });
       };
 
 
-      /* =========================================
-         最初の表示
-      ========================================= */
-
       showLiveCard();
 
 
-      /* =========================================
-         複数配信なら5秒ごとにフェード切り替え
-      ========================================= */
-
       if (items.length > 1) {
 
-        liveSlideTimer = setInterval(() => {
+        liveSlideTimer =
+          setInterval(() => {
 
-          const currentCard =
-            container.querySelector(".live-card");
+            const currentCard =
+              container.querySelector(
+                ".live-card"
+              );
 
-          if (!currentCard) return;
+            if (!currentCard) return;
 
 
-          /* 現在のカードをフェードアウト */
+            currentCard.classList.remove(
+              "is-visible"
+            );
 
-          currentCard.classList.remove(
-            "is-visible"
-          );
 
-          setTimeout(() => {
+            setTimeout(() => {
 
-            currentLiveIndex =
-              (currentLiveIndex + 1) %
-              liveItems.length;
+              currentLiveIndex =
+                (currentLiveIndex + 1) %
+                liveItems.length;
 
-            showLiveCard();
+              showLiveCard();
 
-          }, LIVE_FADE_DURATION);
+            }, LIVE_FADE_DURATION);
 
-        }, LIVE_SLIDE_INTERVAL);
+          }, LIVE_SLIDE_INTERVAL);
       }
     }
 
@@ -656,12 +736,15 @@ updateFullscreenLabel();
     ========================================= */
 
     function renderUpcoming(items) {
-      const container = $("#upcoming-list");
+
+      const container =
+        $("#upcoming-list");
 
       if (!container) return;
 
 
       if (!items.length) {
+
         container.innerHTML = `
           <div class="empty-state small">
 
@@ -681,42 +764,107 @@ updateFullscreenLabel();
 
 
       container.innerHTML =
-        items.slice(0, 6).map(item => `
-          <a
-            class="upcoming-card"
-            href="${escapeHtml(getYouTubeUrl(item))}"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+        items
+          .slice(0, 6)
+          .map(item => `
 
-            <div class="upcoming-time">
-              ${formatTime(item.scheduled_at)}
-            </div>
+            <a
+              class="upcoming-card"
+              href="${escapeHtml(
+                getYouTubeUrl(item)
+              )}"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
 
-            <div class="upcoming-body">
-
-              <div class="upcoming-streamer">
-                ${escapeHtml(
-                  item.streamer_name ||
-                  item.streamer_id ||
-                  "STREAMER"
+              <div class="upcoming-time">
+                ${formatTime(
+                  item.scheduled_at
                 )}
               </div>
 
-              <div class="upcoming-title">
-                ${escapeHtml(
-                  item.title || "配信予定"
-                )}
+              <div class="upcoming-body">
+
+                <div class="upcoming-streamer">
+                  ${escapeHtml(
+                    item.streamer_name ||
+                    item.streamer_id ||
+                    "STREAMER"
+                  )}
+                </div>
+
+                <div class="upcoming-title">
+                  ${escapeHtml(
+                    item.title ||
+                    "配信予定"
+                  )}
+                </div>
+
+                <div class="upcoming-date">
+                  ${formatDate(
+                    item.scheduled_at
+                  )}
+                </div>
+
               </div>
 
-              <div class="upcoming-date">
-                ${formatDate(item.scheduled_at)}
-              </div>
+            </a>
 
-            </div>
+          `)
+          .join("");
+    }
 
-          </a>
-        `).join("");
+
+    /* =========================================
+       NEW VIDEO CHECK
+    ========================================= */
+
+    function isNewVideo(video) {
+
+      const DAY_MS =
+        24 * 60 * 60 * 1000;
+
+      const now =
+        Date.now();
+
+
+      const publishedAt =
+        video.published_at
+          ? new Date(
+              video.published_at
+            ).getTime()
+          : NaN;
+
+
+      const endedAt =
+        video.actual_end_at
+          ? new Date(
+              video.actual_end_at
+            ).getTime()
+          : NaN;
+
+
+      const publishedRecently =
+        Number.isFinite(
+          publishedAt
+        ) &&
+        now - publishedAt >= 0 &&
+        now - publishedAt <= DAY_MS;
+
+
+      const archivedRecently =
+        video.status === "archive" &&
+        Number.isFinite(
+          endedAt
+        ) &&
+        now - endedAt >= 0 &&
+        now - endedAt <= DAY_MS;
+
+
+      return (
+        publishedRecently ||
+        archivedRecently
+      );
     }
 
 
@@ -725,12 +873,15 @@ updateFullscreenLabel();
     ========================================= */
 
     function renderLatest(items) {
-      const container = $("#latest-list");
+
+      const container =
+        $("#latest-list");
 
       if (!container) return;
 
 
       if (!items.length) {
+
         container.innerHTML = `
           <div class="empty-state small">
 
@@ -746,61 +897,93 @@ updateFullscreenLabel();
 
 
       container.innerHTML =
-        items.slice(0, 5).map(item => {
+        items
+          .slice(0, 5)
+          .map(item => {
 
-          const thumbnail =
-            getThumbnail(item);
+            const thumbnail =
+              getThumbnail(item);
 
-          return `
-            <a
-              class="latest-card"
-              href="${escapeHtml(getYouTubeUrl(item))}"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            const isNew =
+              isNewVideo(item);
 
-              <div class="latest-thumb">
 
-                ${
-                  thumbnail
-                    ? `
-                      <img
-                        src="${escapeHtml(thumbnail)}"
-                        alt=""
-                        loading="lazy"
-                      >
-                    `
+            return `
+              <a
+                class="latest-card${
+                  isNew
+                    ? " is-new"
                     : ""
-                }
+                }"
+                href="${escapeHtml(
+                  getYouTubeUrl(item)
+                )}"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
 
-              </div>
+                <div class="latest-thumb">
 
+                  ${
+                    thumbnail
+                      ? `
+                        <img
+                          src="${escapeHtml(
+                            thumbnail
+                          )}"
+                          alt=""
+                          loading="lazy"
+                        >
+                      `
+                      : ""
+                  }
 
-              <div class="latest-body">
-
-                <div class="latest-streamer">
-                  ${escapeHtml(
-                    item.streamer_name ||
-                    item.streamer_id ||
-                    "STREAMER"
-                  )}
                 </div>
 
-                <div class="latest-title">
-                  ${escapeHtml(
-                    item.title || "動画"
-                  )}
+
+                <div class="latest-body">
+
+                  <div class="latest-streamer">
+
+                    ${
+                      isNew
+                        ? `
+                          <span class="latest-new">
+                            NEW
+                          </span>
+                        `
+                        : ""
+                    }
+
+                    ${escapeHtml(
+                      item.streamer_name ||
+                      item.streamer_id ||
+                      "STREAMER"
+                    )}
+
+                  </div>
+
+
+                  <div class="latest-title">
+                    ${escapeHtml(
+                      item.title ||
+                      "動画"
+                    )}
+                  </div>
+
+
+                  <div class="latest-date">
+                    ${formatDate(
+                      item.published_at
+                    )}
+                  </div>
+
                 </div>
 
-                <div class="latest-date">
-                  ${formatDate(item.published_at)}
-                </div>
-
-              </div>
-
-            </a>
-          `;
-        }).join("");
+              </a>
+            `;
+          })
+          .join("");
     }
 
 
@@ -809,16 +992,21 @@ updateFullscreenLabel();
     ========================================= */
 
     function renderXPosts(posts = []) {
-      const container = $("#x-post-list");
+
+      const container =
+        $("#x-post-list");
 
       if (!container) return;
 
 
       if (!posts.length) {
+
         container.innerHTML = `
           <div class="empty-state small">
 
-            <div class="empty-icon">𝕏</div>
+            <div class="empty-icon">
+              𝕏
+            </div>
 
             <div class="empty-title">
               Xのポストを表示できます
@@ -836,58 +1024,71 @@ updateFullscreenLabel();
 
 
       container.innerHTML =
-        posts.slice(0, 8).map(post => `
-          <a
-            class="x-post-card"
-            href="${escapeHtml(post.url || "#")}"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+        posts
+          .slice(0, 8)
+          .map(post => `
 
-            <div class="x-post-head">
+            <a
+              class="x-post-card"
+              href="${escapeHtml(
+                post.url || "#"
+              )}"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
 
-              <div class="x-avatar">
+              <div class="x-post-head">
+
+                <div class="x-avatar">
+                  ${escapeHtml(
+                    (post.name || "X")
+                      .slice(0, 1)
+                  )}
+                </div>
+
+                <div class="x-post-user">
+
+                  <strong>
+                    ${escapeHtml(
+                      post.name ||
+                      post.username ||
+                      "STREAMER"
+                    )}
+                  </strong>
+
+                  <span>
+                    ${escapeHtml(
+                      post.username
+                        ? "@" +
+                          post.username
+                        : ""
+                    )}
+                  </span>
+
+                </div>
+
+                <div class="x-post-date">
+                  ${escapeHtml(
+                    post.date || ""
+                  )}
+                </div>
+
+              </div>
+
+              <div class="x-post-text">
                 ${escapeHtml(
-                  (post.name || "X").slice(0, 1)
+                  post.text || ""
                 )}
               </div>
 
-              <div class="x-post-user">
-
-                <strong>
-                  ${escapeHtml(
-                    post.name ||
-                    post.username ||
-                    "STREAMER"
-                  )}
-                </strong>
-
-                <span>
-                  ${escapeHtml(
-                    post.username
-                      ? "@" + post.username
-                      : ""
-                  )}
-                </span>
-
+              <div class="x-post-link">
+                𝕏で見る ↗
               </div>
 
-              <div class="x-post-date">
-                ${escapeHtml(post.date || "")}
-              </div>
+            </a>
 
-            </div>
-
-            <div class="x-post-text">
-              ${escapeHtml(post.text || "")}
-            </div>
-
-            <div class="x-post-link">
-              𝕏で見る ↗
-            </div>
-
-          </a>
-        `).join("");
+          `)
+          .join("");
     }
 
 
@@ -897,7 +1098,8 @@ updateFullscreenLabel();
 
     async function loadDisplayData() {
 
-      const config = window.STAC_CONFIG;
+      const config =
+        window.STAC_CONFIG;
 
 
       if (
@@ -922,36 +1124,43 @@ updateFullscreenLabel();
         window.supabase;
 
 
-      const client = createClient(
-        config.SUPABASE_URL,
-        config.SUPABASE_PUBLISHABLE_KEY
-      );
+      const client =
+        createClient(
+          config.SUPABASE_URL,
+          config.SUPABASE_PUBLISHABLE_KEY
+        );
 
 
       try {
 
-        const streamersRequest = client
-          .from("streamers")
-          .select(
-            "id,name,thumbnail,enabled"
-          )
-          .eq("enabled", true);
+        const streamersRequest =
+          client
+            .from("streamers")
+            .select(
+              "id,name,thumbnail,enabled"
+            )
+            .eq(
+              "enabled",
+              true
+            );
 
 
-        const videosRequest = client
-          .from("videos")
-          .select(`
-            video_id,
-            streamer_id,
-            status,
-            title,
-            description,
-            published_at,
-            scheduled_at,
-            actual_start_at,
-            thumbnail,
-            url
-          `);
+        const videosRequest =
+          client
+            .from("videos")
+            .select(`
+              video_id,
+              streamer_id,
+              status,
+              title,
+              description,
+              published_at,
+              scheduled_at,
+              actual_start_at,
+              actual_end_at,
+              thumbnail,
+              url
+            `);
 
 
         const [
@@ -973,6 +1182,7 @@ updateFullscreenLabel();
           throw streamerError;
         }
 
+
         if (videoError) {
           throw videoError;
         }
@@ -990,28 +1200,34 @@ updateFullscreenLabel();
 
 
         const enriched =
-          (videos || []).map(video => {
+          (videos || []).map(
+            video => {
 
-            const streamer =
-              streamerMap.get(
-                video.streamer_id
-              );
-
-            return {
-              ...video,
-
-              streamer_name:
-                streamer?.name ||
-                video.streamer_id ||
-                "STREAMER",
-
-              thumbnail:
-                video.thumbnail || null
-            };
-          });
+              const streamer =
+                streamerMap.get(
+                  video.streamer_id
+                );
 
 
-        const now = Date.now();
+              return {
+                ...video,
+
+                streamer_name:
+                  streamer?.name ||
+                  video.streamer_id ||
+                  "STREAMER",
+
+                thumbnail:
+                  video.thumbnail ||
+                  null
+              };
+            }
+          );
+
+
+        const now =
+          Date.now();
+
 
         const retentionMs =
           VIDEO_RETENTION_DAYS *
@@ -1024,7 +1240,8 @@ updateFullscreenLabel();
         const live =
           enriched.filter(
             video =>
-              video.status === "live"
+              video.status ===
+              "live"
           );
 
 
@@ -1033,7 +1250,8 @@ updateFullscreenLabel();
 
             .filter(
               video =>
-                video.status === "upcoming" &&
+                video.status ===
+                  "upcoming" &&
                 video.scheduled_at
             )
 
@@ -1043,13 +1261,20 @@ updateFullscreenLabel();
                   video.scheduled_at
                 ).getTime()
                 >=
-                now - 5 * 60 * 1000
+                now -
+                  5 *
+                  60 *
+                  1000
             )
 
             .sort(
               (a, b) =>
-                new Date(a.scheduled_at) -
-                new Date(b.scheduled_at)
+                new Date(
+                  a.scheduled_at
+                ) -
+                new Date(
+                  b.scheduled_at
+                )
             );
 
 
@@ -1058,15 +1283,20 @@ updateFullscreenLabel();
 
             .filter(
               video =>
-                ["video", "archive"]
-                  .includes(video.status)
+                [
+                  "video",
+                  "archive"
+                ].includes(
+                  video.status
+                )
             )
 
             .filter(video => {
 
               const date =
                 new Date(
-                  video.published_at || 0
+                  video.published_at ||
+                  0
                 ).getTime();
 
               return (
@@ -1078,19 +1308,25 @@ updateFullscreenLabel();
             .sort(
               (a, b) =>
                 new Date(
-                  b.published_at || 0
+                  b.published_at ||
+                  0
                 ) -
                 new Date(
-                  a.published_at || 0
+                  a.published_at ||
+                  0
                 )
             );
 
 
         renderLive(live);
 
-        renderUpcoming(upcoming);
+        renderUpcoming(
+          upcoming
+        );
 
-        renderLatest(latest);
+        renderLatest(
+          latest
+        );
 
         renderXPosts([]);
 
@@ -1100,11 +1336,22 @@ updateFullscreenLabel();
         console.log(
           "STAC display loaded:",
           {
-            streamers: streamers?.length || 0,
-            videos: videos?.length || 0,
-            live: live.length,
-            upcoming: upcoming.length,
-            latest: latest.length
+            streamers:
+              streamers?.length ||
+              0,
+
+            videos:
+              videos?.length ||
+              0,
+
+            live:
+              live.length,
+
+            upcoming:
+              upcoming.length,
+
+            latest:
+              latest.length
           }
         );
 
@@ -1144,8 +1391,6 @@ updateFullscreenLabel();
       loadDisplayData,
       60 * 1000
     );
-
-    
 
   </script>
 
