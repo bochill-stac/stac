@@ -305,6 +305,43 @@ img {
   font-size: 14px;
 }
 
+.menu-item svg,
+.display-link svg {
+  width: 17px;
+  height: 17px;
+}
+
+.x-zone {
+  margin-top: 10px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: rgba(127, 127, 127, 0.06);
+}
+
+.x-zone-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-soft);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.x-mark {
+  width: 18px;
+  text-align: center;
+  color: var(--text);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.x-zone-placeholder {
+  margin-top: 8px;
+  padding-left: 30px;
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
 .menu-item:hover,
 .display-link:hover {
   background: rgba(127, 127, 127, 0.09);
@@ -661,7 +698,7 @@ img {
   display: grid;
   grid-template-columns: repeat(
     auto-fill,
-    minmax(210px, 1fr)
+    minmax(260px, 1fr)
   );
   gap: 14px;
 }
