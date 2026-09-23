@@ -418,9 +418,11 @@ async function loadData() {
 
         streamer_name: streamer?.name || "不明なストリーマー",
 
-        thumbnail: video.video_id
-          ? `https://i.ytimg.com/vi/${video.video_id}/hqdefault.jpg`
-          : "",
+        thumbnail:
+          video.thumbnail ||
+          (video.video_id
+            ? `https://i.ytimg.com/vi/${video.video_id}/maxresdefault.jpg`
+            : ""),
 
         url: video.video_id
           ? `https://www.youtube.com/watch?v=${video.video_id}`

@@ -1,17 +1,12 @@
 import { XMLParser } from "fast-xml-parser";
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_SERVICE_ROLE_KEY =
-  process.env.SUPABASE_SERVICE_ROLE_KEY;
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
 
-if (
-  !SUPABASE_URL ||
-  !SUPABASE_SERVICE_ROLE_KEY ||
-  !YOUTUBE_API_KEY
-) {
+if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY || !YOUTUBE_API_KEY) {
   throw new Error(
-    "Missing SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY / YOUTUBE_API_KEY"
+    "Missing SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY / YOUTUBE_API_KEY",
   );
 }
 
@@ -33,35 +28,25 @@ const youtubeParser = new XMLParser({
 
 const VIDEO_RETENTION_DAYS = 7;
 
-const VIDEO_RETENTION_MS =
-  VIDEO_RETENTION_DAYS *
-  24 *
-  60 *
-  60 *
-  1000;
+const VIDEO_RETENTION_MS = VIDEO_RETENTION_DAYS * 24 * 60 * 60 * 1000;
 
 // ==================================================
 // Supabase
 // ==================================================
 
 async function supabase(path, options = {}) {
-  const response = await fetch(
-    `${SUPABASE_REST}${path}`,
-    {
-      ...options,
-      headers: {
-        ...SUPABASE_HEADERS,
-        ...(options.headers || {}),
-      },
-    }
-  );
+  const response = await fetch(`${SUPABASE_REST}${path}`, {
+    ...options,
+    headers: {
+      ...SUPABASE_HEADERS,
+      ...(options.headers || {}),
+    },
+  });
 
   const text = await response.text();
 
   if (!response.ok) {
-    throw new Error(
-      `Supabase ${response.status}: ${text}`
-    );
+    throw new Error(`Supabase ${response.status}: ${text}`);
   }
 
   return text ? JSON.parse(text) : null;
@@ -79,18 +64,14 @@ async function getRSS(channelId) {
   const response = await fetch(url);
 
   if (!response.ok) {
-    throw new Error(
-      `YouTube RSS ${response.status}`
-    );
+    throw new Error(`YouTube RSS ${response.status}`);
   }
 
   const xml = await response.text();
 
   const parsed = youtubeParser.parse(xml);
 
-  return toArray(
-    parsed?.feed?.entry
-  );
+  return toArray(parsed?.feed?.entry);
 }
 
 // ==================================================
@@ -100,9 +81,7 @@ async function getRSS(channelId) {
 function toArray(value) {
   if (!value) return [];
 
-  return Array.isArray(value)
-    ? value
-    : [value];
+  return Array.isArray(value) ? value : [value];
 }
 
 // ==================================================
@@ -114,38 +93,20 @@ function toArray(value) {
 async function getVideoDetails(videoIds) {
   const result = new Map();
 
-  for (
-    let i = 0;
-    i < videoIds.length;
-    i += 50
-  ) {
-    const batch = videoIds.slice(
-      i,
-      i + 50
-    );
+  for (let i = 0; i < videoIds.length; i += 50) {
+    const batch = videoIds.slice(i, i + 50);
 
     if (!batch.length) {
       continue;
     }
 
-    const url = new URL(
-      "https://www.googleapis.com/youtube/v3/videos"
-    );
+    const url = new URL("https://www.googleapis.com/youtube/v3/videos");
 
-    url.searchParams.set(
-      "part",
-      "snippet,contentDetails,liveStreamingDetails"
-    );
+    url.searchParams.set("part", "snippet,contentDetails,liveStreamingDetails");
 
-    url.searchParams.set(
-      "id",
-      batch.join(",")
-    );
+    url.searchParams.set("id", batch.join(","));
 
-    url.searchParams.set(
-      "key",
-      YOUTUBE_API_KEY
-    );
+    url.searchParams.set("key", YOUTUBE_API_KEY);
 
     const response = await fetch(url);
 
@@ -153,17 +114,12 @@ async function getVideoDetails(videoIds) {
 
     if (!response.ok) {
       throw new Error(
-        `YouTube API ${response.status}: ${JSON.stringify(
-          data
-        )}`
+        `YouTube API ${response.status}: ${JSON.stringify(data)}`,
       );
     }
 
     for (const video of data.items || []) {
-      result.set(
-        video.id,
-        video
-      );
+      result.set(video.id, video);
     }
   }
 
@@ -175,23 +131,15 @@ async function getVideoDetails(videoIds) {
 // ==================================================
 
 function getStatus(video) {
-  const live =
-    video.liveStreamingDetails || {};
+  const live = video.liveStreamingDetails || {};
 
   // 現在配信中
-  if (
-    live.actualStartTime &&
-    !live.actualEndTime
-  ) {
+  if (live.actualStartTime && !live.actualEndTime) {
     return "live";
   }
 
   // 配信予定
-  if (
-    live.scheduledStartTime &&
-    !live.actualStartTime &&
-    !live.actualEndTime
-  ) {
+  if (live.scheduledStartTime && !live.actualStartTime && !live.actualEndTime) {
     return "upcoming";
   }
 
@@ -213,28 +161,19 @@ function durationToSeconds(value) {
     return null;
   }
 
-  const match = value.match(
-    /PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/
-  );
+  const match = value.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
 
   if (!match) {
     return null;
   }
 
-  const hours =
-    Number(match[1] || 0);
+  const hours = Number(match[1] || 0);
 
-  const minutes =
-    Number(match[2] || 0);
+  const minutes = Number(match[2] || 0);
 
-  const seconds =
-    Number(match[3] || 0);
+  const seconds = Number(match[3] || 0);
 
-  return (
-    hours * 3600 +
-    minutes * 60 +
-    seconds
-  );
+  return hours * 3600 + minutes * 60 + seconds;
 }
 
 // ==================================================
@@ -245,10 +184,7 @@ function durationToSeconds(value) {
 // 終了配信は actualStartTime を基準にする。
 // ==================================================
 
-function isWithinSevenDays(
-  video,
-  status
-) {
+function isWithinSevenDays(video, status) {
   // 現在配信中
   if (status === "live") {
     return true;
@@ -259,45 +195,33 @@ function isWithinSevenDays(
     return true;
   }
 
-  const live =
-    video.liveStreamingDetails || {};
+  const live = video.liveStreamingDetails || {};
 
-  const snippet =
-    video.snippet || {};
+  const snippet = video.snippet || {};
 
   let baseTime = null;
 
   if (status === "archive") {
     // 終了配信は配信開始日時を基準
-    baseTime =
-      live.actualStartTime ||
-      snippet.publishedAt ||
-      null;
+    baseTime = live.actualStartTime || snippet.publishedAt || null;
   } else {
     // 通常動画は公開日時を基準
-    baseTime =
-      snippet.publishedAt ||
-      null;
+    baseTime = snippet.publishedAt || null;
   }
 
   if (!baseTime) {
     return false;
   }
 
-  const timestamp =
-    new Date(baseTime).getTime();
+  const timestamp = new Date(baseTime).getTime();
 
   if (!Number.isFinite(timestamp)) {
     return false;
   }
 
-  const age =
-    Date.now() - timestamp;
+  const age = Date.now() - timestamp;
 
-  return (
-    age >= 0 &&
-    age <= VIDEO_RETENTION_MS
-  );
+  return age >= 0 && age <= VIDEO_RETENTION_MS;
 }
 
 // ==================================================
@@ -305,47 +229,28 @@ function isWithinSevenDays(
 // ==================================================
 
 async function main() {
-  console.log(
-    "========================================"
-  );
+  console.log("========================================");
 
-  console.log(
-    "STAC YouTube Sync 開始"
-  );
+  console.log("STAC YouTube Sync 開始");
 
-  console.log(
-    "========================================"
-  );
+  console.log("========================================");
 
-  console.log(
-    "Supabase URL:",
-    SUPABASE_URL.replace(
-      /^https?:\/\//,
-      ""
-    )
-  );
+  console.log("Supabase URL:", SUPABASE_URL.replace(/^https?:\/\//, ""));
 
-  console.log(
-    `保存対象期間: ${VIDEO_RETENTION_DAYS}日`
-  );
+  console.log(`保存対象期間: ${VIDEO_RETENTION_DAYS}日`);
 
   // ------------------------------------------------
   // ストリーマー取得
   // ------------------------------------------------
 
-  const streamers =
-    await supabase(
-      "/streamers?select=id,name,channel_id&enabled=eq.true"
-    );
-
-  console.log(
-    `ストリーマー数: ${streamers.length}`
+  const streamers = await supabase(
+    "/streamers?select=id,name,channel_id&enabled=eq.true",
   );
 
+  console.log(`ストリーマー数: ${streamers.length}`);
+
   if (!streamers.length) {
-    console.log(
-      "有効なストリーマーがありません。"
-    );
+    console.log("有効なストリーマーがありません。");
 
     return;
   }
@@ -359,18 +264,11 @@ async function main() {
   for (const streamer of streamers) {
     try {
       console.log("");
-      console.log(
-        `[${streamer.name}] RSS取得開始`
-      );
+      console.log(`[${streamer.name}] RSS取得開始`);
 
-      const entries =
-        await getRSS(
-          streamer.channel_id
-        );
+      const entries = await getRSS(streamer.channel_id);
 
-      console.log(
-        `[${streamer.name}] RSS取得完了: ${entries.length}件`
-      );
+      console.log(`[${streamer.name}] RSS取得完了: ${entries.length}件`);
 
       for (const entry of entries) {
         rawEntries.push({
@@ -379,10 +277,7 @@ async function main() {
         });
       }
     } catch (error) {
-      console.error(
-        `[${streamer.name}] RSS取得失敗:`,
-        error.message
-      );
+      console.error(`[${streamer.name}] RSS取得失敗:`, error.message);
     }
   }
 
@@ -392,19 +287,12 @@ async function main() {
 
   const videoIds = [
     ...new Set(
-      rawEntries
-        .map(
-          ({ entry }) =>
-            entry["yt:videoId"]
-        )
-        .filter(Boolean)
+      rawEntries.map(({ entry }) => entry["yt:videoId"]).filter(Boolean),
     ),
   ];
 
   console.log("");
-  console.log(
-    `YouTube動画ID数: ${videoIds.length}`
-  );
+  console.log(`YouTube動画ID数: ${videoIds.length}`);
 
   // ------------------------------------------------
   // YouTube API詳細取得
@@ -414,19 +302,11 @@ async function main() {
 
   if (videoIds.length) {
     try {
-      videoMap =
-        await getVideoDetails(
-          videoIds
-        );
+      videoMap = await getVideoDetails(videoIds);
 
-      console.log(
-        `YouTube詳細取得: ${videoMap.size}件`
-      );
+      console.log(`YouTube詳細取得: ${videoMap.size}件`);
     } catch (error) {
-      console.error(
-        "YouTube詳細取得失敗:",
-        error.message
-      );
+      console.error("YouTube詳細取得失敗:", error.message);
     }
   }
 
@@ -442,48 +322,34 @@ async function main() {
   let archiveCount = 0;
   let skippedOldCount = 0;
 
-  for (const {
-    streamer,
-    entry,
-  } of rawEntries) {
-    const videoId =
-      entry["yt:videoId"];
+  for (const { streamer, entry } of rawEntries) {
+    const videoId = entry["yt:videoId"];
 
     if (!videoId) {
       continue;
     }
 
-    const video =
-      videoMap.get(videoId);
+    const video = videoMap.get(videoId);
 
     if (!video) {
       continue;
     }
 
-    const live =
-      video.liveStreamingDetails ||
-      {};
+    const live = video.liveStreamingDetails || {};
 
-    const snippet =
-      video.snippet || {};
+    const snippet = video.snippet || {};
 
-    const currentStatus =
-      getStatus(video);
+    const currentStatus = getStatus(video);
 
     // ------------------------------------------------
     // 7日制限
     // ------------------------------------------------
 
-    if (
-      !isWithinSevenDays(
-        video,
-        currentStatus
-      )
-    ) {
+    if (!isWithinSevenDays(video, currentStatus)) {
       skippedOldCount++;
 
       console.log(
-        `⏭️ SKIP OLD  ${streamer.name} | ${videoId} | ${snippet.title || entry.title || "無題"}`
+        `⏭️ SKIP OLD  ${streamer.name} | ${videoId} | ${snippet.title || entry.title || "無題"}`,
       );
 
       continue;
@@ -493,41 +359,34 @@ async function main() {
     // 現在の videos テーブルに存在する列だけ
     // ------------------------------------------------
 
+    const thumbnail =
+      snippet.thumbnails?.maxres?.url ??
+      snippet.thumbnails?.standard?.url ??
+      snippet.thumbnails?.high?.url ??
+      snippet.thumbnails?.medium?.url ??
+      snippet.thumbnails?.default?.url ??
+      null;
+
     const row = {
       video_id: videoId,
 
-      streamer_id:
-        streamer.id,
+      thumbnail: thumbnail,
 
-      status:
-        currentStatus,
+      streamer_id: streamer.id,
 
-      title:
-        snippet.title ||
-        entry.title ||
-        "無題",
+      status: currentStatus,
 
-      description:
-        snippet.description ||
-        null,
+      title: snippet.title || entry.title || "無題",
 
-      published_at:
-        snippet.publishedAt ||
-        entry.published ||
-        null,
+      description: snippet.description || null,
 
-      scheduled_at:
-        live.scheduledStartTime ||
-        null,
+      published_at: snippet.publishedAt || entry.published || null,
 
-      actual_start_at:
-        live.actualStartTime ||
-        null,
+      scheduled_at: live.scheduledStartTime || null,
 
-      duration:
-        durationToSeconds(
-          video.contentDetails?.duration
-        ),
+      actual_start_at: live.actualStartTime || null,
+
+      duration: durationToSeconds(video.contentDetails?.duration),
     };
 
     rows.push(row);
@@ -539,20 +398,12 @@ async function main() {
     if (currentStatus === "live") {
       liveCount++;
 
-      console.log(
-        `🔴 LIVE  ${streamer.name} | ${videoId} | ${row.title}`
-      );
-    } else if (
-      currentStatus === "upcoming"
-    ) {
+      console.log(`🔴 LIVE  ${streamer.name} | ${videoId} | ${row.title}`);
+    } else if (currentStatus === "upcoming") {
       upcomingCount++;
 
-      console.log(
-        `🟡 UPCOMING  ${streamer.name} | ${videoId} | ${row.title}`
-      );
-    } else if (
-      currentStatus === "archive"
-    ) {
+      console.log(`🟡 UPCOMING  ${streamer.name} | ${videoId} | ${row.title}`);
+    } else if (currentStatus === "archive") {
       archiveCount++;
     } else {
       videoCount++;
@@ -566,57 +417,40 @@ async function main() {
   if (rows.length) {
     try {
       console.log("");
-      console.log(
-        `Supabase保存開始: ${rows.length}件`
+      console.log(`Supabase保存開始: ${rows.length}件`);
+
+      const response = await fetch(
+        `${SUPABASE_REST}/videos?on_conflict=video_id`,
+        {
+          method: "POST",
+
+          headers: {
+            ...SUPABASE_HEADERS,
+
+            "Content-Type": "application/json",
+
+            Prefer: "resolution=merge-duplicates,return=minimal",
+          },
+
+          body: JSON.stringify(rows),
+        },
       );
 
-      const response =
-        await fetch(
-          `${SUPABASE_REST}/videos?on_conflict=video_id`,
-          {
-            method: "POST",
-
-            headers: {
-              ...SUPABASE_HEADERS,
-
-              "Content-Type":
-                "application/json",
-
-              Prefer:
-                "resolution=merge-duplicates,return=minimal",
-            },
-
-            body: JSON.stringify(
-              rows
-            ),
-          }
-        );
-
-      const text =
-        await response.text();
+      const text = await response.text();
 
       if (!response.ok) {
-        throw new Error(
-          `Supabase UPSERT ${response.status}: ${text}`
-        );
+        throw new Error(`Supabase UPSERT ${response.status}: ${text}`);
       }
 
-      console.log(
-        `Supabase保存成功: ${rows.length}件`
-      );
+      console.log(`Supabase保存成功: ${rows.length}件`);
     } catch (error) {
-      console.error(
-        "Supabase UPSERT失敗:",
-        error.message
-      );
+      console.error("Supabase UPSERT失敗:", error.message);
 
       throw error;
     }
   } else {
     console.log("");
-    console.log(
-      "保存対象の動画はありません。"
-    );
+    console.log("保存対象の動画はありません。");
   }
 
   // ------------------------------------------------
@@ -625,53 +459,29 @@ async function main() {
 
   console.log("");
 
-  console.log(
-    "========================================"
-  );
+  console.log("========================================");
 
-  console.log(
-    "STAC YouTube Sync 完了"
-  );
+  console.log("STAC YouTube Sync 完了");
 
-  console.log(
-    "========================================"
-  );
+  console.log("========================================");
 
-  console.log(
-    `RSS取得動画: ${rawEntries.length}`
-  );
+  console.log(`RSS取得動画: ${rawEntries.length}`);
 
-  console.log(
-    `詳細取得動画: ${videoMap.size}`
-  );
+  console.log(`詳細取得動画: ${videoMap.size}`);
 
-  console.log(
-    `保存対象: ${rows.length}`
-  );
+  console.log(`保存対象: ${rows.length}`);
 
-  console.log(
-    `LIVE: ${liveCount}`
-  );
+  console.log(`LIVE: ${liveCount}`);
 
-  console.log(
-    `UPCOMING: ${upcomingCount}`
-  );
+  console.log(`UPCOMING: ${upcomingCount}`);
 
-  console.log(
-    `通常動画: ${videoCount}`
-  );
+  console.log(`通常動画: ${videoCount}`);
 
-  console.log(
-    `ARCHIVE: ${archiveCount}`
-  );
+  console.log(`ARCHIVE: ${archiveCount}`);
 
-  console.log(
-    `古い動画として除外: ${skippedOldCount}`
-  );
+  console.log(`古い動画として除外: ${skippedOldCount}`);
 
-  console.log(
-    "========================================"
-  );
+  console.log("========================================");
 }
 
 // ==================================================
@@ -681,9 +491,7 @@ async function main() {
 main().catch((error) => {
   console.error("");
 
-  console.error(
-    "STAC YouTube Sync 致命的エラー"
-  );
+  console.error("STAC YouTube Sync 致命的エラー");
 
   console.error(error);
 
