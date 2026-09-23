@@ -1,0 +1,10 @@
+{
+  "name": "スト活 Display",
+  "short_name": "STAC Display",
+  "start_url": "./display.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#111214",
+  "theme_color": "#111214",
+  "orientation": "landscape"
+}
