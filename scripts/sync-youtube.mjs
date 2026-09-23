@@ -386,6 +386,8 @@ async function main() {
 
       actual_start_at: live.actualStartTime || null,
 
+      actual_end_at: live.actualEndTime || null,
+
       duration: durationToSeconds(video.contentDetails?.duration),
     };
 
