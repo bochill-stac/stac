@@ -555,10 +555,38 @@ function schedCard(video) {
   `;
 }
 
+function isNewVideo(video) {
+  const DAY_MS = 24 * 60 * 60 * 1000;
+  const now = Date.now();
+
+  const publishedAt = video.published_at
+    ? new Date(video.published_at).getTime()
+    : NaN;
+
+  const endedAt = video.actual_end_at
+    ? new Date(video.actual_end_at).getTime()
+    : NaN;
+
+  const publishedRecently =
+    Number.isFinite(publishedAt) &&
+    now - publishedAt >= 0 &&
+    now - publishedAt <= DAY_MS;
+
+  const archivedRecently =
+    video.status === "archive" &&
+    Number.isFinite(endedAt) &&
+    now - endedAt >= 0 &&
+    now - endedAt <= DAY_MS;
+
+  return publishedRecently || archivedRecently;
+}
+
 function latestItem(video) {
+  const isNew = isNewVideo(video);
+
   return `
     <article
-      class="latest-item"
+      class="latest-item${isNew ? " is-new" : ""}"
       data-url="${esc(video.url)}"
       data-video-id="${esc(video.video_id)}"
     >
@@ -572,6 +600,7 @@ function latestItem(video) {
 
       <div>
         <div class="latest-streamer">
+          ${isNew ? `<span class="latest-new">NEW</span>` : ""}
           ${esc(video.streamer_name)}
         </div>
 

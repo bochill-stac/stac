@@ -984,3 +984,21 @@ img {
     grid-template-columns: 1fr;
   }
 }
+
+.latest-item.is-new {
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.latest-new {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 7px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
