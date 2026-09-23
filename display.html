@@ -330,61 +330,71 @@
 
 const fullscreenButton = $("#display-fullscreen");
 
-const isIpad =
-  /iPad/.test(navigator.userAgent) ||
-  (
-    navigator.platform === "MacIntel" &&
-    navigator.maxTouchPoints > 1
+function updateFullscreenLabel() {
+  if (!fullscreenButton) return;
+
+  const label = fullscreenButton.querySelector(
+    "span:last-child"
   );
+
+  const isFullscreen =
+    !!document.fullscreenElement ||
+    document.documentElement.classList.contains(
+      "stac-ipad-fullscreen"
+    );
+
+  if (label) {
+    label.textContent =
+      isFullscreen ? "解除" : "全画面";
+  }
+}
+
 
 if (fullscreenButton) {
   fullscreenButton.addEventListener("click", async () => {
 
-    /* -----------------------------------------
-       iPad
-       ブラウザのFullscreen APIは使わない
-    ----------------------------------------- */
+    try {
 
-    if (isIpad) {
+      /* -----------------------------------------
+         現在Fullscreenなら解除
+      ----------------------------------------- */
+
+      if (document.fullscreenElement) {
+
+        await document.exitFullscreen();
+
+        updateFullscreenLabel();
+
+        return;
+      }
+
+
+      /* -----------------------------------------
+         Fullscreen APIを使う
+      ----------------------------------------- */
+
+      if (
+        document.documentElement.requestFullscreen
+      ) {
+
+        await document.documentElement.requestFullscreen();
+
+        updateFullscreenLabel();
+
+        return;
+      }
+
+
+      /* -----------------------------------------
+         APIが使えない場合のフォールバック
+         iPad用
+      ----------------------------------------- */
 
       document.documentElement.classList.toggle(
         "stac-ipad-fullscreen"
       );
 
-      const label =
-        fullscreenButton.querySelector(
-          "span:last-child"
-        );
-
-      const isFullscreen =
-        document.documentElement.classList.contains(
-          "stac-ipad-fullscreen"
-        );
-
-      if (label) {
-        label.textContent =
-          isFullscreen ? "解除" : "全画面";
-      }
-
-      return;
-    }
-
-    /* -----------------------------------------
-       PC
-       通常のFullscreen API
-    ----------------------------------------- */
-
-    try {
-
-      if (!document.fullscreenElement) {
-
-        await document.documentElement.requestFullscreen();
-
-      } else {
-
-        await document.exitFullscreen();
-
-      }
+      updateFullscreenLabel();
 
     } catch (error) {
 
@@ -393,44 +403,36 @@ if (fullscreenButton) {
         error
       );
 
+      /* -----------------------------------------
+         Safari / iPadでFullscreen APIが
+         拒否された場合もフォールバック
+      ----------------------------------------- */
+
+      document.documentElement.classList.toggle(
+        "stac-ipad-fullscreen"
+      );
+
+      updateFullscreenLabel();
     }
   });
 }
 
 
 /* -----------------------------------------
-   PCのFullscreen状態を監視
+   Fullscreen状態の監視
 ----------------------------------------- */
 
 document.addEventListener(
   "fullscreenchange",
-  () => {
-
-    const button =
-      $("#display-fullscreen");
-
-    if (!button) return;
-
-    const label =
-      button.querySelector(
-        "span:last-child"
-      );
-
-    if (document.fullscreenElement) {
-
-      if (label) {
-        label.textContent = "解除";
-      }
-
-    } else {
-
-      if (label) {
-        label.textContent = "全画面";
-      }
-
-    }
-  }
+  updateFullscreenLabel
 );
+
+
+/* -----------------------------------------
+   初期状態
+----------------------------------------- */
+
+updateFullscreenLabel();
 
 
     /* =========================================
