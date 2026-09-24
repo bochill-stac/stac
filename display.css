@@ -651,74 +651,118 @@ button {
 
 @media (max-width: 760px) {
   .display-app {
-    padding: 18px 14px;
+    padding: 16px 12px;
   }
 
   .display-header {
     align-items: center;
-    gap: 12px;
+    gap: 10px;
+  }
+
+  .brand {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .brand-jp {
+    font-size: 22px;
+  }
+
+  .brand-en {
+    margin-top: 5px;
+    font-size: 8px;
   }
 
   .display-date {
     display: none;
   }
 
-  .display-clock {
-    font-size: 21px;
-  }
-
-  /* =========================================
-     MOBILE HEADER BUTTONS
-     ========================================= */
+  /* =========================
+     MOBILE HEADER
+     ========================= */
 
   .header-tools {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 8px;
-    flex-shrink: 0;
+    display: grid;
+    grid-template-columns: 48px 48px;
+    grid-template-rows: 48px 24px;
+    gap: 4px 7px;
+
+    flex: 0 0 auto;
+    width: 103px;
   }
 
+  /* ボタン共通 */
   .theme-button {
-    width: 52px;
-    height: 52px;
-    min-width: 52px;
-    min-height: 52px;
-    max-width: 52px;
-    max-height: 52px;
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
+    min-height: 48px !important;
+    max-width: 48px !important;
+    max-height: 48px !important;
 
-    flex: 0 0 52px;
+    padding: 0 !important;
+    margin: 0;
 
-    padding: 0;
+    flex: none !important;
 
-    display: inline-flex;
+    display: inline-flex !important;
     align-items: center;
     justify-content: center;
 
     border-radius: 14px;
   }
 
-  /* スマホではボタンの文字を消す */
-  .theme-button > span:last-child {
-    display: none;
+  /* 全画面・テーマの順番 */
+  #display-fullscreen {
+    grid-column: 1;
+    grid-row: 1;
   }
 
-  /* 全画面アイコン */
+  #display-theme {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  /* ボタン内の文字を完全に非表示 */
+  #display-fullscreen > span:not(.fullscreen-icon),
+  #display-theme > span:not(.theme-icon) {
+    display: none !important;
+  }
+
+  .fullscreen-icon,
+  .theme-icon {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    line-height: 1;
+  }
+
   .fullscreen-icon {
     font-size: 25px;
-    line-height: 1;
   }
 
-  /* テーマアイコン */
   .theme-icon {
-    margin: 0;
-    font-size: 24px;
-    line-height: 1;
+    font-size: 23px;
   }
 
-  /* =========================================
+  /* 時計をボタンの下へ */
+  .display-clock {
+  grid-column: 1 / span 2;
+  grid-row: 2;
+  min-width: 0;
+  width: 100%;
+  font-size: 21px;
+  line-height: 24px;
+  text-align: center;
+}
+
+  /* =========================
      MOBILE MAIN
-     ========================================= */
+     ========================= */
 
   .display-main {
     display: flex;
