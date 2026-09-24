@@ -23,6 +23,9 @@ let currentUser = null;
 let myStreamers = [];
 let allVideos = [];
 
+const STREAMERS_PER_PAGE = 5;
+let streamerPage = 1;
+
 /* =========================================================
    Supabase
 ========================================================= */
@@ -457,7 +460,7 @@ async function loadData() {
 function buckets() {
   const now = Date.now();
 
-  const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000;
+  const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
 
   const live = allVideos.filter((video) => video.status === "live");
 
@@ -473,7 +476,7 @@ function buckets() {
 
       const date = new Date(video.published_at || 0).getTime();
 
-      return Number.isFinite(date) && date >= sevenDaysAgo;
+      return Number.isFinite(date) && date >= thirtyDaysAgo;
     })
     .sort(
       (a, b) => new Date(b.published_at || 0) - new Date(a.published_at || 0),
@@ -740,12 +743,24 @@ function renderStreamers() {
   }
 
   if (!myStreamers.length) {
+    streamerPage = 1;
+
     list.innerHTML =
       '<div class="empty">登録中のストリーマーはいません。</div>';
+
+    renderStreamerPagination();
     return;
   }
 
-  list.innerHTML = myStreamers
+  const totalPages = Math.ceil(myStreamers.length / STREAMERS_PER_PAGE);
+
+  // ストリーマー削除などで現在ページがなくなった場合
+  streamerPage = Math.min(Math.max(streamerPage, 1), totalPages);
+
+  const start = (streamerPage - 1) * STREAMERS_PER_PAGE;
+  const visibleStreamers = myStreamers.slice(start, start + STREAMERS_PER_PAGE);
+
+  list.innerHTML = visibleStreamers
     .map(
       (streamer) => `
         <div class="streamer-row">
@@ -782,6 +797,71 @@ function renderStreamers() {
       removeStreamer(button.dataset.remove),
     );
   });
+
+  renderStreamerPagination();
+}
+
+function renderStreamerPagination() {
+  const container = $("#myStreamersPagination");
+
+  if (!container) {
+    return;
+  }
+
+  const totalPages = Math.ceil(myStreamers.length / STREAMERS_PER_PAGE);
+
+  if (totalPages <= 1) {
+    container.innerHTML = "";
+    return;
+  }
+
+  container.innerHTML = `
+    <button
+      type="button"
+      class="streamer-page-button"
+      data-streamer-page="prev"
+      ${streamerPage <= 1 ? "disabled" : ""}
+      aria-label="前のページ"
+    >
+      <span data-lucide="chevron-left"></span>
+    </button>
+
+    <span class="streamer-page-indicator">
+      ${streamerPage} / ${totalPages}
+    </span>
+
+    <button
+      type="button"
+      class="streamer-page-button"
+      data-streamer-page="next"
+      ${streamerPage >= totalPages ? "disabled" : ""}
+      aria-label="次のページ"
+    >
+      <span data-lucide="chevron-right"></span>
+    </button>
+  `;
+
+  container
+    .querySelector('[data-streamer-page="prev"]')
+    ?.addEventListener("click", () => {
+      if (streamerPage > 1) {
+        streamerPage--;
+        renderStreamers();
+      }
+    });
+
+  container
+    .querySelector('[data-streamer-page="next"]')
+    ?.addEventListener("click", () => {
+      if (streamerPage < totalPages) {
+        streamerPage++;
+        renderStreamers();
+      }
+    });
+
+  if (window.lucide) {
+    lucide.createIcons();
+  }
 }
 
 function renderAll() {

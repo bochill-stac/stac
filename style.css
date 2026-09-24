@@ -1207,3 +1207,55 @@ img {
     font-size: 13px;
   }
 }
+
+/* =========================================================
+   Streamer Pagination
+========================================================= */
+
+.streamer-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-top: 1px solid var(--line);
+}
+
+.streamer-page-button {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.streamer-page-button:hover:not(:disabled) {
+  background: var(--panel-hover);
+  color: var(--text);
+}
+
+.streamer-page-button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.streamer-page-button svg {
+  width: 17px;
+  height: 17px;
+}
+
+.streamer-page-indicator {
+  min-width: 42px;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 650;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
