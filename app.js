@@ -964,20 +964,33 @@ document.querySelectorAll("[data-view]").forEach((el) => {
 ========================================================= */
 
 const sidebar = $("#sidebar");
+const main = document.querySelector(".main");
+const collapseButton = $("#collapseMenu");
+const sidebarOpenButton = $("#sidebarOpen");
 
-$("#collapseMenu")?.addEventListener("click", () => {
-  if (!sidebar) {
-    return;
+function openSidebar() {
+  sidebar?.classList.remove("closed");
+  main?.classList.remove("sidebar-closed");
+  sidebarOpenButton?.classList.remove("show");
+
+  if (collapseButton) {
+    collapseButton.innerHTML = '<span data-lucide="chevron-left"></span>';
+
+    collapseButton.setAttribute("aria-label", "サイドバーを閉じる");
+
+    lucide.createIcons();
   }
+}
 
-  const collapsed = sidebar.classList.toggle("collapsed");
+function closeSidebar() {
+  sidebar?.classList.add("closed");
+  main?.classList.add("sidebar-closed");
+  sidebarOpenButton?.classList.add("show");
+}
 
-  document
-    .querySelector(".main")
-    ?.classList.toggle("sidebar-collapsed", collapsed);
+collapseButton?.addEventListener("click", closeSidebar);
 
-  $("#collapseMenu").textContent = collapsed ? "›" : "‹";
-});
+sidebarOpenButton?.addEventListener("click", openSidebar);
 
 function openMobile() {
   sidebar?.classList.add("open");
@@ -992,7 +1005,6 @@ function closeMobile() {
 $("#mobileMenu")?.addEventListener("click", openMobile);
 
 $("#sidebarOverlay")?.addEventListener("click", closeMobile);
-
 /* =========================================================
    Clock
 ========================================================= */

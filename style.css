@@ -23,10 +23,7 @@
 [data-theme="light"] {
   --bg: #eceef2;
   --bg-soft: #f7f8fa;
-
-  /* ライトではサイドバーも明るくする */
   --sidebar: #ffffff;
-
   --panel: #ffffff;
   --panel-hover: #f3f4f7;
   --line: rgba(20, 22, 28, 0.1);
@@ -43,6 +40,10 @@
   --thumb-bg: #d9dce3;
   color-scheme: light;
 }
+
+/* =========================================================
+   Base
+========================================================= */
 
 * {
   box-sizing: border-box;
@@ -108,9 +109,17 @@ img {
   font-size: 13px;
 }
 
+/* =========================================================
+   Buttons
+========================================================= */
+
 .icon-button {
   width: 34px;
   height: 34px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  padding: 0;
   border-radius: 8px;
   background: transparent;
   color: var(--text-muted);
@@ -120,6 +129,11 @@ img {
 .icon-button:hover {
   color: var(--text);
   background: rgba(127, 127, 127, 0.08);
+}
+
+.icon-button svg {
+  width: 18px;
+  height: 18px;
 }
 
 .primary-button {
@@ -239,27 +253,43 @@ img {
 }
 
 /* =========================================================
-   App
+   App shell
 ========================================================= */
 
 .app-shell {
   min-height: 100vh;
 }
 
+/* =========================================================
+   Sidebar
+========================================================= */
+
 .sidebar {
   position: fixed;
   inset: 0 auto 0 0;
   z-index: 40;
+
   width: 260px;
+  height: 100vh;
+
   display: flex;
   flex-direction: column;
+
   padding: 24px 14px 16px;
 
   background: var(--sidebar);
-
   border-right: 1px solid var(--line);
-
   color: var(--text);
+
+  transform: translateX(0);
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease;
+}
+
+/* PC: 完全に収納 */
+.sidebar.closed {
+  transform: translateX(-100%);
 }
 
 .sidebar-head {
@@ -293,8 +323,10 @@ img {
   display: flex;
   align-items: center;
   gap: 12px;
+
   min-height: 44px;
   padding: 0 14px;
+
   border-radius: 10px;
 
   color: var(--text-soft);
@@ -303,12 +335,33 @@ img {
   text-align: left;
   cursor: pointer;
   font-size: 14px;
+
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
 }
 
 .menu-item svg,
 .display-link svg {
   width: 17px;
   height: 17px;
+  flex-shrink: 0;
+}
+
+.menu-item:hover,
+.display-link:hover {
+  background: rgba(127, 127, 127, 0.09);
+  color: var(--text);
+}
+
+.menu-item.active {
+  background: rgba(127, 127, 127, 0.14);
+  color: var(--text);
+}
+
+.live-dot {
+  color: var(--live);
+  font-size: 10px;
 }
 
 .x-zone {
@@ -329,6 +382,7 @@ img {
 
 .x-mark {
   width: 18px;
+  flex-shrink: 0;
   text-align: center;
   color: var(--text);
   font-size: 16px;
@@ -340,22 +394,6 @@ img {
   padding-left: 30px;
   color: var(--text-muted);
   font-size: 11px;
-}
-
-.menu-item:hover,
-.display-link:hover {
-  background: rgba(127, 127, 127, 0.09);
-  color: var(--text);
-}
-
-.menu-item.active {
-  background: rgba(127, 127, 127, 0.14);
-  color: var(--text);
-}
-
-.live-dot {
-  color: var(--live);
-  font-size: 10px;
 }
 
 .display-link {
@@ -377,8 +415,11 @@ img {
 .user-mark {
   width: 34px;
   height: 34px;
+  flex-shrink: 0;
+
   display: grid;
   place-items: center;
+
   border-radius: 50%;
   background: var(--panel-hover);
   color: var(--text);
@@ -390,34 +431,58 @@ img {
   font-size: 10px;
 }
 
-.sidebar.collapsed {
-  width: 76px;
+/* =========================================================
+   Sidebar open button
+========================================================= */
+
+/*
+  サイドバーを閉じたときだけ表示。
+  76pxの縮小サイドバーは使わない。
+*/
+
+.sidebar-open-button {
+  display: none;
+  flex-shrink: 0;
 }
 
-.sidebar.collapsed .brand-name,
-.sidebar.collapsed .brand-sub,
-.sidebar.collapsed .menu-item span + *,
-.sidebar.collapsed .display-link span + *,
-.sidebar.collapsed .sidebar-user div:last-child {
-  display: none;
+.sidebar-open-button.show {
+  display: grid;
+  place-items: center;
 }
+
+/* =========================================================
+   Overlay
+========================================================= */
 
 .sidebar-overlay {
   display: none;
+
   position: fixed;
   inset: 0;
   z-index: 30;
+
   background: rgba(0, 0, 0, 0.45);
 }
 
-.main {
-  margin-left: 260px;
-  min-height: 100vh;
-  transition: margin-left 0.2s ease;
+.sidebar-overlay.show {
+  display: block;
 }
 
-.main.sidebar-collapsed {
-  margin-left: 76px;
+/* =========================================================
+   Main
+========================================================= */
+
+.main {
+  min-height: 100vh;
+  margin-left: 260px;
+
+  transition:
+    margin-left 0.22s ease;
+}
+
+/* サイドバーを完全に閉じた状態 */
+.main.sidebar-closed {
+  margin-left: 0;
 }
 
 /* =========================================================
@@ -429,11 +494,11 @@ img {
   top: 0;
   z-index: 20;
 
+  min-height: 62px;
   display: flex;
   align-items: center;
   gap: 12px;
 
-  height: 62px;
   padding: 0 28px;
 
   background: color-mix(
@@ -447,34 +512,52 @@ img {
 }
 
 .topbar-title {
-  font-size: 13px;
+  min-width: 0;
+
   color: var(--text-muted);
+  font-size: 13px;
+
+  white-space: nowrap;
 }
 
 .topbar-right {
   margin-left: auto;
+
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 12px;
+
+  flex-shrink: 0;
 }
 
 .last-sync {
   color: var(--text-muted);
   font-size: 11px;
+  white-space: nowrap;
 }
 
 .theme-button {
   height: 32px;
   padding: 0 12px;
+
   border-radius: 999px;
+  border: 1px solid var(--line);
 
   background: var(--panel);
-  border: 1px solid var(--line);
   color: var(--text-soft);
 
   cursor: pointer;
+
   font-size: 11px;
   font-weight: 700;
+
+  white-space: nowrap;
+}
+
+.theme-button:hover {
+  background: var(--panel-hover);
+  color: var(--text);
 }
 
 /* =========================================================
@@ -482,7 +565,9 @@ img {
 ========================================================= */
 
 .content {
+  width: 100%;
   max-width: 1180px;
+
   margin: 0 auto;
   padding: 36px 32px 80px;
 }
@@ -579,15 +664,32 @@ img {
 
 .live-card {
   overflow: hidden;
+
   border: 1px solid var(--line);
   border-radius: 14px;
+
   background: var(--panel);
+
+  transition:
+    transform 0.15s ease,
+    background 0.15s ease;
+}
+
+.live-card:hover {
+  transform: translateY(-1px);
+  background: var(--panel-hover);
 }
 
 .live-thumb {
   position: relative;
+
   aspect-ratio: 16 / 9;
-  background: var(--thumb-bg) center / cover no-repeat;
+
+  background:
+    var(--thumb-bg)
+    center /
+    cover
+    no-repeat;
 }
 
 .live-badge,
@@ -595,10 +697,14 @@ img {
   position: absolute;
   top: 10px;
   left: 10px;
+
   padding: 4px 8px;
+
   border-radius: 6px;
+
   background: var(--live);
   color: #1a0f12;
+
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.06em;
@@ -621,6 +727,7 @@ img {
   place-items: center;
 
   border-radius: 6px;
+
   background: #ff0033;
   color: #fff;
 
@@ -649,6 +756,7 @@ img {
 .sched-title,
 .latest-title {
   margin-top: 5px;
+
   font-size: 14px;
   font-weight: 650;
   line-height: 1.45;
@@ -681,9 +789,11 @@ img {
 .schedule-slot-head {
   display: flex;
   align-items: center;
+
   min-height: 36px;
   margin-bottom: 12px;
   padding: 0 12px;
+
   border-radius: 8px;
 
   background: var(--slot);
@@ -705,8 +815,10 @@ img {
 
 .sched-card {
   overflow: hidden;
+
   border: 1px solid var(--line);
   border-radius: 12px;
+
   background: var(--panel);
 }
 
@@ -717,8 +829,14 @@ img {
 
 .sched-thumb {
   position: relative;
+
   aspect-ratio: 16 / 9;
-  background: var(--thumb-bg) center / cover no-repeat;
+
+  background:
+    var(--thumb-bg)
+    center /
+    cover
+    no-repeat;
 }
 
 .sched-meta {
@@ -744,19 +862,29 @@ img {
 .latest-item {
   display: grid;
   grid-template-columns: 148px minmax(0, 1fr) auto;
+
   gap: 16px;
   align-items: center;
 
   padding: 10px 12px;
 
   border-radius: 12px;
-  background: var(--panel);
   border: 1px solid var(--line);
+
+  background: var(--panel);
+
+  transition: background 0.15s ease;
+}
+
+.latest-item:hover {
+  background: var(--panel-hover);
 }
 
 .latest-thumb {
   overflow: hidden;
+
   aspect-ratio: 16 / 9;
+
   border-radius: 8px;
   background: var(--thumb-bg);
 }
@@ -773,21 +901,46 @@ img {
   white-space: nowrap;
 }
 
+.latest-item.is-new {
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.latest-new {
+  display: inline-flex;
+  align-items: center;
+
+  margin-right: 7px;
+  padding: 2px 6px;
+
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.1);
+
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
 /* =========================================================
    Panels
 ========================================================= */
 
 .panel {
   overflow: hidden;
+
   margin-bottom: 20px;
 
   border: 1px solid var(--line);
   border-radius: 14px;
+
   background: var(--panel);
 }
 
 .panel-title {
   padding: 16px 20px;
+
   border-bottom: 1px solid var(--line);
 
   color: var(--text-muted);
@@ -799,9 +952,11 @@ img {
   display: flex;
   align-items: center;
   justify-content: space-between;
+
   gap: 16px;
 
   padding: 14px 20px;
+
   border-bottom: 1px solid var(--line);
 
   cursor: default;
@@ -815,13 +970,17 @@ img {
   display: flex;
   align-items: center;
   gap: 12px;
+
   min-width: 0;
 }
 
 .streamer-avatar {
   width: 44px;
   height: 44px;
+
   overflow: hidden;
+  flex-shrink: 0;
+
   border-radius: 50%;
   background: var(--thumb-bg);
 }
@@ -834,6 +993,7 @@ img {
 
 .streamer-action {
   padding: 7px 10px;
+
   border-radius: 7px;
 
   background: rgba(127, 127, 127, 0.12);
@@ -846,6 +1006,7 @@ img {
 .add-form {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
+
   gap: 10px;
   padding: 20px;
 }
@@ -863,9 +1024,11 @@ img {
   display: flex;
   justify-content: space-between;
   align-items: center;
+
   gap: 16px;
 
   padding: 18px 20px;
+
   border-bottom: 1px solid var(--line);
 }
 
@@ -891,10 +1054,11 @@ img {
   padding: 0 12px;
 
   border-radius: 999px;
-  background: transparent;
   border: 1px solid var(--line);
 
+  background: transparent;
   color: var(--text-muted);
+
   cursor: pointer;
   font-size: 12px;
 }
@@ -907,10 +1071,12 @@ img {
 
 .logout-button {
   display: block;
+
   width: calc(100% - 40px);
+  height: 44px;
+
   margin: 18px 20px 20px;
 
-  height: 44px;
   border-radius: 10px;
 
   background: rgba(239, 107, 123, 0.12);
@@ -944,13 +1110,24 @@ img {
 }
 
 @media (max-width: 800px) {
+  /* スマホではサイドバーを左からスライドイン */
   .sidebar {
     transform: translateX(-100%);
     width: 260px;
   }
 
+  .sidebar.closed {
+    transform: translateX(-100%);
+  }
+
   .sidebar.open {
     transform: translateX(0);
+  }
+
+  /* PC用の再オープンボタンはスマホでは使わない */
+  .sidebar-open-button,
+  .sidebar-open-button.show {
+    display: none !important;
   }
 
   .sidebar-overlay.show {
@@ -958,13 +1135,27 @@ img {
   }
 
   .main,
-  .main.sidebar-collapsed {
+  .main.sidebar-closed {
     margin-left: 0;
   }
 
   .mobile-only {
     display: grid;
     place-items: center;
+  }
+
+  .topbar {
+    min-height: 58px;
+    padding: 0 16px;
+  }
+
+  .topbar-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .last-sync {
+    display: none;
   }
 
   .content {
@@ -985,20 +1176,34 @@ img {
   }
 }
 
-.latest-item.is-new {
-  background: rgba(255, 255, 255, 0.035);
-}
+/* =========================================================
+   Small mobile
+========================================================= */
 
-.latest-new {
-  display: inline-flex;
-  align-items: center;
-  margin-right: 7px;
-  padding: 2px 6px;
-  border-radius: 999px;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  color: var(--text);
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+@media (max-width: 480px) {
+  .topbar {
+    gap: 8px;
+  }
+
+  .theme-button {
+    padding: 0 10px;
+  }
+
+  .welcome h1 {
+    font-size: 30px;
+  }
+
+  .page-head h1 {
+    font-size: 28px;
+  }
+
+  .latest-item {
+    grid-template-columns: 96px minmax(0, 1fr);
+    gap: 12px;
+    padding: 8px;
+  }
+
+  .latest-title {
+    font-size: 13px;
+  }
 }

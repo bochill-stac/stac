@@ -2,11 +2,18 @@
 <html lang="ja" data-theme="dark">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  >
 
   <meta name="theme-color" content="#111214">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta
+    name="apple-mobile-web-app-status-bar-style"
+    content="black-translucent"
+  >
   <meta name="apple-mobile-web-app-title" content="スト活">
 
   <title>スト活 — Streamer Activity</title>
@@ -14,43 +21,105 @@
   <link rel="stylesheet" href="./style.css">
   <link rel="manifest" href="./manifest.json">
 </head>
+
 <body>
 
+<!-- =======================================================
+     Auth
+======================================================= -->
+
 <div id="authScreen" class="auth-screen">
+
   <div class="auth-box">
+
     <div class="auth-brand">
       <div class="auth-title">スト活</div>
       <div class="auth-subtitle">STREAMER ACTIVITY</div>
     </div>
 
     <div class="auth-form">
-      <p class="auth-lead">推しの配信と予定を、アカウントごとにまとめる。</p>
+
+      <p class="auth-lead">
+        推しの配信と予定を、アカウントごとにまとめる。
+      </p>
 
       <div class="field">
         <label for="authId">ID</label>
-        <input id="authId" type="text" autocomplete="username" placeholder="IDを入力">
+
+        <input
+          id="authId"
+          type="text"
+          autocomplete="username"
+          placeholder="IDを入力"
+        >
       </div>
 
       <div class="field">
         <label for="authPassword">パスワード</label>
-        <input id="authPassword" type="password" autocomplete="current-password" placeholder="パスワードを入力">
+
+        <input
+          id="authPassword"
+          type="password"
+          autocomplete="current-password"
+          placeholder="パスワードを入力"
+        >
       </div>
 
-      <button id="loginButton" class="primary-button" type="button">ログイン</button>
-      <button id="signupButton" class="sub-button" type="button">新しくアカウントを作る</button>
-      <div id="authMessage" class="auth-message"></div>
+      <button
+        id="loginButton"
+        class="primary-button"
+        type="button"
+      >
+        ログイン
+      </button>
+
+      <button
+        id="signupButton"
+        class="sub-button"
+        type="button"
+      >
+        新しくアカウントを作る
+      </button>
+
+      <div
+        id="authMessage"
+        class="auth-message"
+      ></div>
+
     </div>
+
   </div>
+
 </div>
+
+
+<!-- =======================================================
+     App
+======================================================= -->
 
 <div id="app" class="app-shell hidden">
 
-  <aside class="sidebar" id="sidebar">
+  <!-- =====================================================
+       Sidebar
+  ====================================================== -->
+
+  <aside
+    class="sidebar"
+    id="sidebar"
+  >
 
     <div class="sidebar-head">
+
       <div class="brand">
-        <div class="brand-name">スト活</div>
-        <div class="brand-sub">STREAMER ACTIVITY</div>
+
+        <div class="brand-name">
+          スト活
+        </div>
+
+        <div class="brand-sub">
+          STREAMER ACTIVITY
+        </div>
+
       </div>
 
       <button
@@ -61,78 +130,165 @@
       >
         <span data-lucide="chevron-left"></span>
       </button>
+
     </div>
+
 
     <nav class="menu">
 
-      <button class="menu-item active" data-view="home" type="button">
+      <button
+        class="menu-item active"
+        data-view="home"
+        type="button"
+      >
         <span data-lucide="house"></span>
         <span>ホーム</span>
       </button>
 
-      <button class="menu-item" data-view="live" type="button">
-        <span data-lucide="radio" class="live-dot"></span>
+      <button
+        class="menu-item"
+        data-view="live"
+        type="button"
+      >
+        <span
+          data-lucide="radio"
+          class="live-dot"
+        ></span>
         <span>配信中</span>
       </button>
 
-      <button class="menu-item" data-view="upcoming" type="button">
+      <button
+        class="menu-item"
+        data-view="upcoming"
+        type="button"
+      >
         <span data-lucide="clock-3"></span>
         <span>配信予定</span>
       </button>
 
-      <button class="menu-item" data-view="latest" type="button">
+      <button
+        class="menu-item"
+        data-view="latest"
+        type="button"
+      >
         <span data-lucide="list"></span>
         <span>最新情報</span>
       </button>
 
-      <button class="menu-item" data-view="streamers" type="button">
+      <button
+        class="menu-item"
+        data-view="streamers"
+        type="button"
+      >
         <span data-lucide="users"></span>
         <span>ストリーマー</span>
       </button>
 
     </nav>
 
-    <a class="menu-item display-link" href="./display.html">
+
+    <!-- Display -->
+
+    <a
+      class="menu-item display-link"
+      href="./display.html"
+    >
       <span data-lucide="monitor"></span>
       <span>Display</span>
     </a>
 
+
     <!-- X -->
+
     <div class="x-zone">
+
       <div class="x-zone-title">
+
         <span data-lucide="at-sign"></span>
         <span>X</span>
+
       </div>
 
       <div class="x-zone-placeholder">
         ポスト
       </div>
+
     </div>
+
+
+    <!-- Sidebar bottom -->
 
     <div class="sidebar-bottom">
 
       <div class="sidebar-user">
-        <div class="user-mark" id="userMark">?</div>
+
+        <div
+          class="user-mark"
+          id="userMark"
+        >
+          ?
+        </div>
 
         <div>
-          <div id="userName">---</div>
-          <span class="user-status">ログイン中</span>
+
+          <div id="userName">
+            ---
+          </div>
+
+          <span class="user-status">
+            ログイン中
+          </span>
+
         </div>
+
       </div>
 
-      <button class="menu-item" data-view="settings" type="button">
+
+      <button
+        class="menu-item"
+        data-view="settings"
+        type="button"
+      >
         <span data-lucide="settings"></span>
         <span>設定</span>
       </button>
 
     </div>
+
   </aside>
 
-  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- Mobile overlay -->
+
+  <div
+    class="sidebar-overlay"
+    id="sidebarOverlay"
+  ></div>
+
+
+  <!-- =====================================================
+       Main
+  ====================================================== -->
 
   <main class="main">
 
+    <!-- Topbar -->
+
     <header class="topbar">
+
+      <!-- PC: sidebarを閉じた後に表示 -->
+
+      <button
+        class="icon-button sidebar-open-button"
+        id="sidebarOpen"
+        type="button"
+        aria-label="サイドバーを開く"
+      >
+        <span data-lucide="chevron-right"></span>
+      </button>
+
+
+      <!-- Mobile -->
 
       <button
         class="icon-button mobile-only"
@@ -143,10 +299,20 @@
         <span data-lucide="menu"></span>
       </button>
 
-      <div class="topbar-title">Streamer Activity</div>
+
+      <div class="topbar-title">
+        Streamer Activity
+      </div>
+
 
       <div class="topbar-right">
-        <span id="lastSync" class="last-sync">同期確認中…</span>
+
+        <span
+          id="lastSync"
+          class="last-sync"
+        >
+          同期確認中…
+        </span>
 
         <button
           id="themeToggle"
@@ -156,140 +322,336 @@
         >
           ライト
         </button>
+
       </div>
 
     </header>
 
+
+    <!-- =================================================
+         Content
+    ================================================== -->
+
     <div class="content">
 
-      <section class="view active" id="homeView">
+
+      <!-- =================================================
+           Home
+      ================================================== -->
+
+      <section
+        class="view active"
+        id="homeView"
+      >
 
         <div class="welcome">
+
           <div>
-            <div class="eyebrow">STREAMER ACTIVITY</div>
-            <h1>おかえりなさい。</h1>
-            <p>推しの「今」を、ひとつの場所に。</p>
+
+            <div class="eyebrow">
+              STREAMER ACTIVITY
+            </div>
+
+            <h1>
+              おかえりなさい。
+            </h1>
+
+            <p>
+              推しの「今」を、ひとつの場所に。
+            </p>
+
           </div>
 
-          <div class="clock" id="clock">00:00</div>
+
+          <div
+            class="clock"
+            id="clock"
+          >
+            00:00
+          </div>
+
         </div>
+
+
+        <!-- LIVE -->
 
         <section class="content-section">
 
           <div class="section-heading">
+
             <div>
-              <div class="eyebrow">LIVE NOW</div>
-              <h2>配信中</h2>
+
+              <div class="eyebrow">
+                LIVE NOW
+              </div>
+
+              <h2>
+                配信中
+              </h2>
+
             </div>
 
-            <button class="section-link" data-view="live" type="button">
+            <button
+              class="section-link"
+              data-view="live"
+              type="button"
+            >
               すべて見る →
             </button>
+
           </div>
 
-          <div id="liveList" class="live-grid">
-            <div class="loading">読み込み中…</div>
+
+          <div
+            id="liveList"
+            class="live-grid"
+          >
+            <div class="loading">
+              読み込み中…
+            </div>
           </div>
 
         </section>
+
+
+        <!-- UPCOMING -->
 
         <section class="content-section">
 
           <div class="section-heading">
+
             <div>
-              <div class="eyebrow">UPCOMING</div>
-              <h2>配信予定</h2>
+
+              <div class="eyebrow">
+                UPCOMING
+              </div>
+
+              <h2>
+                配信予定
+              </h2>
+
             </div>
 
-            <button class="section-link" data-view="upcoming" type="button">
+            <button
+              class="section-link"
+              data-view="upcoming"
+              type="button"
+            >
               すべて見る →
             </button>
+
           </div>
 
-          <div id="upcomingList" class="schedule-board">
-            <div class="loading">読み込み中…</div>
+
+          <div
+            id="upcomingList"
+            class="schedule-board"
+          >
+            <div class="loading">
+              読み込み中…
+            </div>
           </div>
 
         </section>
+
+
+        <!-- LATEST -->
 
         <section class="content-section">
 
           <div class="section-heading">
+
             <div>
-              <div class="eyebrow">LATEST</div>
-              <h2>最新情報</h2>
+
+              <div class="eyebrow">
+                LATEST
+              </div>
+
+              <h2>
+                最新情報
+              </h2>
+
             </div>
 
-            <button class="section-link" data-view="latest" type="button">
+            <button
+              class="section-link"
+              data-view="latest"
+              type="button"
+            >
               すべて見る →
             </button>
+
           </div>
 
-          <div id="latestList" class="latest-list">
-            <div class="loading">読み込み中…</div>
+
+          <div
+            id="latestList"
+            class="latest-list"
+          >
+            <div class="loading">
+              読み込み中…
+            </div>
           </div>
 
         </section>
 
       </section>
 
-      <section class="view" id="liveView">
+
+      <!-- =================================================
+           Live View
+      ================================================== -->
+
+      <section
+        class="view"
+        id="liveView"
+      >
 
         <div class="page-head">
-          <div class="eyebrow">LIVE NOW</div>
-          <h1>配信中</h1>
-          <p>いま配信している登録ストリーマー</p>
+
+          <div class="eyebrow">
+            LIVE NOW
+          </div>
+
+          <h1>
+            配信中
+          </h1>
+
+          <p>
+            いま配信している登録ストリーマー
+          </p>
+
         </div>
 
-        <div id="livePageList" class="live-grid"></div>
+
+        <div
+          id="livePageList"
+          class="live-grid"
+        ></div>
 
       </section>
 
-      <section class="view" id="upcomingView">
+
+      <!-- =================================================
+           Upcoming View
+      ================================================== -->
+
+      <section
+        class="view"
+        id="upcomingView"
+      >
 
         <div class="page-head">
-          <div class="eyebrow">UPCOMING</div>
-          <h1>配信予定</h1>
-          <p>すぽじゅーるのように、時間帯で並びます</p>
+
+          <div class="eyebrow">
+            UPCOMING
+          </div>
+
+          <h1>
+            配信予定
+          </h1>
+
+          <p>
+            今後配信予定のストリーマー
+          </p>
+
         </div>
 
-        <div id="upcomingPageList" class="schedule-board"></div>
+
+        <div
+          id="upcomingPageList"
+          class="schedule-board"
+        ></div>
 
       </section>
 
-      <section class="view" id="latestView">
+
+      <!-- =================================================
+           Latest View
+      ================================================== -->
+
+      <section
+        class="view"
+        id="latestView"
+      >
 
         <div class="page-head">
-          <div class="eyebrow">LATEST</div>
-          <h1>最新情報</h1>
-          <p>最近公開された動画・アーカイブ</p>
+
+          <div class="eyebrow">
+            LATEST
+          </div>
+
+          <h1>
+            最新情報
+          </h1>
+
+          <p>
+            最近公開された動画・アーカイブ
+          </p>
+
         </div>
 
-        <div id="latestPageList" class="latest-list"></div>
+
+        <div
+          id="latestPageList"
+          class="latest-list"
+        ></div>
 
       </section>
 
-      <section class="view" id="streamersView">
+
+      <!-- =================================================
+           Streamers View
+      ================================================== -->
+
+      <section
+        class="view"
+        id="streamersView"
+      >
 
         <div class="page-head">
-          <div class="eyebrow">STREAMERS</div>
-          <h1>ストリーマー</h1>
-          <p>このアカウントで追いかける配信者</p>
+
+          <div class="eyebrow">
+            STREAMERS
+          </div>
+
+          <h1>
+            ストリーマー
+          </h1>
+
+          <p>
+            このアカウントで追いかける配信者
+          </p>
+
         </div>
+
+
+        <!-- Registered -->
 
         <div class="panel">
 
-          <div class="panel-title">登録中</div>
+          <div class="panel-title">
+            登録中
+          </div>
 
           <div id="myStreamers">
-            <div class="loading">読み込み中…</div>
+
+            <div class="loading">
+              読み込み中…
+            </div>
+
           </div>
 
         </div>
 
+
+        <!-- Add -->
+
         <div class="panel">
 
-          <div class="panel-title">ストリーマーを追加</div>
+          <div class="panel-title">
+            ストリーマーを追加
+          </div>
 
           <div class="add-form">
 
@@ -308,7 +670,10 @@
               追加
             </button>
 
-            <div id="addStreamerMessage" class="auth-message"></div>
+            <div
+              id="addStreamerMessage"
+              class="auth-message"
+            ></div>
 
           </div>
 
@@ -316,38 +681,99 @@
 
       </section>
 
-      <section class="view" id="settingsView">
+
+      <!-- =================================================
+           Settings
+      ================================================== -->
+
+      <section
+        class="view"
+        id="settingsView"
+      >
 
         <div class="page-head">
-          <div class="eyebrow">SETTINGS</div>
-          <h1>設定</h1>
-          <p>アカウントと見た目</p>
+
+          <div class="eyebrow">
+            SETTINGS
+          </div>
+
+          <h1>
+            設定
+          </h1>
+
+          <p>
+            アカウントと見た目
+          </p>
+
         </div>
+
 
         <div class="panel settings-panel">
 
+          <!-- Account -->
+
           <div class="setting-row">
+
             <div>
-              <div class="setting-title">アカウントID</div>
-              <div class="setting-value" id="settingsUserId">---</div>
+
+              <div class="setting-title">
+                アカウントID
+              </div>
+
+              <div
+                class="setting-value"
+                id="settingsUserId"
+              >
+                ---
+              </div>
+
             </div>
+
           </div>
 
+
+          <!-- Theme -->
+
           <div class="setting-row">
 
             <div>
-              <div class="setting-title">テーマ</div>
+
+              <div class="setting-title">
+                テーマ
+              </div>
+
               <div class="setting-description">
                 黒めが基本。明るい画面にも切り替えられます。
               </div>
+
             </div>
 
-            <div class="theme-pills" id="themePills">
-              <button type="button" data-theme-value="dark">ダーク</button>
-              <button type="button" data-theme-value="light">ライト</button>
+
+            <div
+              class="theme-pills"
+              id="themePills"
+            >
+
+              <button
+                type="button"
+                data-theme-value="dark"
+              >
+                ダーク
+              </button>
+
+              <button
+                type="button"
+                data-theme-value="light"
+              >
+                ライト
+              </button>
+
             </div>
 
           </div>
+
+
+          <!-- Logout -->
 
           <button
             id="logoutButton"
@@ -362,14 +788,20 @@
       </section>
 
     </div>
+
   </main>
+
 </div>
+
+
+<!-- =======================================================
+     Scripts
+======================================================= -->
 
 <script src="./config.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<!-- Lucide -->
 <script src="https://unpkg.com/lucide@latest"></script>
 
 <script src="./app.js"></script>
