@@ -865,29 +865,33 @@ button {
 }
 
 /* =========================================
-   LATEST SCROLLBAR
+   LATEST / UPCOMING SCROLLBAR
 ========================================= */
 
-.latest-list {
+.latest-list,
+.upcoming-list {
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
 }
 
-/* Chrome / Edge / Safari */
-.latest-list::-webkit-scrollbar {
-  height: 6px;
+.latest-list::-webkit-scrollbar,
+.upcoming-list::-webkit-scrollbar {
+  width: 6px;
 }
 
-.latest-list::-webkit-scrollbar-track {
+.latest-list::-webkit-scrollbar-track,
+.upcoming-list::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.latest-list::-webkit-scrollbar-thumb {
+.latest-list::-webkit-scrollbar-thumb,
+.upcoming-list::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.22);
   border-radius: 999px;
 }
 
-.latest-list::-webkit-scrollbar-thumb:hover {
+.latest-list::-webkit-scrollbar-thumb:hover,
+.upcoming-list::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.38);
 }
 
