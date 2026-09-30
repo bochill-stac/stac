@@ -287,7 +287,7 @@ button {
 .live-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom, rgba(0,0,0,.05), transparent 45%, rgba(0,0,0,.72));
+  background: linear-gradient(to bottom, transparent 65%, rgba(0,0,0,.25));
   pointer-events: none;
 }
 
@@ -865,6 +865,93 @@ button {
 }
 
 /* =========================================
+   OTHER LIVE
+========================================= */
+
+.other-live {
+  padding: 0 14px 14px;
+}
+
+.other-live-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+  padding: 0 2px;
+}
+
+.other-live-header > span:first-child {
+  color: var(--text-soft);
+  font-size: 10px;
+  font-weight: 750;
+}
+
+.other-live-count {
+  color: var(--live);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .08em;
+}
+
+.other-live-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-height: 58px;
+  overflow: hidden;
+}
+
+.other-live-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  max-width: 180px;
+  padding: 6px 9px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--panel-soft);
+  color: var(--text-soft);
+  text-decoration: none;
+  transition: background .18s ease, border-color .18s ease, color .18s ease;
+}
+
+.other-live-item:hover {
+  background: var(--panel-hover);
+  border-color: var(--line-strong);
+  color: var(--text);
+}
+
+.other-live-dot {
+  width: 6px;
+  height: 6px;
+  flex: 0 0 6px;
+  border-radius: 50%;
+  background: var(--live);
+  box-shadow: 0 0 8px rgba(239,170,182,.45);
+}
+
+.other-live-streamer {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 10px;
+  font-weight: 650;
+}
+
+@media (max-width: 760px) {
+  .other-live {
+    padding: 0 12px 12px;
+  }
+
+  .other-live-list {
+    max-height: 52px;
+  }
+}
+
+/* =========================================
    LATEST / UPCOMING SCROLLBAR
 ========================================= */
 
@@ -934,10 +1021,6 @@ html.stac-ipad-fullscreen .display-app {
 
   .header-tools {
     gap: 14px;
-  }
-
-  .display-section {
-    padding: 22px;
   }
 
   .section-title {

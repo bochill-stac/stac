@@ -76,14 +76,15 @@
         </div>
 
         <div id="live-list" class="live-list">
-          <div class="empty-state">
-            <div class="empty-title">配信を確認中…</div>
-            <div class="empty-sub">
-              YouTubeの最新情報を読み込んでいます
-            </div>
-          </div>
-        </div>
+  <div class="empty-state">
+    <div class="empty-title">配信を確認中…</div>
+    <div class="empty-sub">
+      YouTubeの最新情報を読み込んでいます
+    </div>
+  </div>
+</div>
 
+<div id="other-live" class="other-live"></div>
       </section>
 
 
@@ -619,116 +620,168 @@
 
     function renderLive(items) {
 
-      liveItems = items;
+  liveItems = items;
 
-      if (liveSlideTimer) {
+  if (liveSlideTimer) {
+    clearInterval(liveSlideTimer);
+    liveSlideTimer = null;
+  }
 
-        clearInterval(
-          liveSlideTimer
+  const container = $("#live-list");
+  const otherContainer = $("#other-live");
+
+  if (!container) return;
+
+  if (!items.length) {
+
+    container.innerHTML = `
+      <div class="empty-state live-empty">
+
+        <div class="empty-orb"></div>
+
+        <div class="empty-title">
+          現在、配信はありません
+        </div>
+
+        <div class="empty-sub">
+          配信が始まるとここに表示されます
+        </div>
+
+      </div>
+    `;
+
+    if (otherContainer) {
+      otherContainer.innerHTML = "";
+    }
+
+    return;
+  }
+
+  currentLiveIndex = 0;
+
+  const renderOtherLive = () => {
+
+    if (!otherContainer) return;
+
+    if (liveItems.length <= 1) {
+      otherContainer.innerHTML = "";
+      return;
+    }
+
+    const currentItem =
+      liveItems[
+        currentLiveIndex %
+        liveItems.length
+      ];
+
+    const others =
+      liveItems.filter(
+        item =>
+          item.video_id !==
+          currentItem.video_id
+      );
+
+    otherContainer.innerHTML = `
+      <div class="other-live-header">
+        <span>他の配信中</span>
+        <span class="other-live-count">
+          ${liveItems.length}配信中
+        </span>
+      </div>
+
+      <div class="other-live-list">
+        ${others
+          .map(item => `
+            <a
+              class="other-live-item"
+              href="${escapeHtml(
+                getYouTubeUrl(item)
+              )}"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+
+              <div class="other-live-dot"></div>
+
+              <div class="other-live-streamer">
+                ${escapeHtml(
+                  item.streamer_name ||
+                  item.streamer_id ||
+                  "STREAMER"
+                )}
+              </div>
+
+            </a>
+          `)
+          .join("")}
+      </div>
+    `;
+  };
+
+  const showLiveCard = () => {
+
+    const item =
+      liveItems[
+        currentLiveIndex %
+        liveItems.length
+      ];
+
+    container.innerHTML =
+      createLiveCard(item);
+
+    const card =
+      container.querySelector(
+        ".live-card"
+      );
+
+    if (!card) return;
+
+    renderOtherLive();
+
+    requestAnimationFrame(() => {
+
+      requestAnimationFrame(() => {
+
+        card.classList.add(
+          "is-visible"
         );
 
-        liveSlideTimer = null;
-      }
+      });
 
+    });
+  };
 
-      const container =
-        $("#live-list");
+  showLiveCard();
 
-      if (!container) return;
+  if (items.length > 1) {
 
+    liveSlideTimer =
+      setInterval(() => {
 
-      if (!items.length) {
-
-        container.innerHTML = `
-          <div class="empty-state live-empty">
-
-            <div class="empty-orb"></div>
-
-            <div class="empty-title">
-              現在、配信はありません
-            </div>
-
-            <div class="empty-sub">
-              配信が始まるとここに表示されます
-            </div>
-
-          </div>
-        `;
-
-        return;
-      }
-
-
-      currentLiveIndex = 0;
-
-
-      const showLiveCard = () => {
-
-        const item =
-          liveItems[
-            currentLiveIndex %
-            liveItems.length
-          ];
-
-        container.innerHTML =
-          createLiveCard(item);
-
-        const card =
+        const currentCard =
           container.querySelector(
             ".live-card"
           );
 
-        if (!card) return;
+        if (!currentCard) return;
 
+        currentCard.classList.remove(
+          "is-visible"
+        );
 
-        requestAnimationFrame(() => {
+        setTimeout(() => {
 
-          requestAnimationFrame(() => {
+          currentLiveIndex =
+            (currentLiveIndex + 1) %
+            liveItems.length;
 
-            card.classList.add(
-              "is-visible"
-            );
+          showLiveCard();
 
-          });
+        }, LIVE_FADE_DURATION);
 
-        });
-      };
-
-
-      showLiveCard();
-
-
-      if (items.length > 1) {
-
-        liveSlideTimer =
-          setInterval(() => {
-
-            const currentCard =
-              container.querySelector(
-                ".live-card"
-              );
-
-            if (!currentCard) return;
-
-
-            currentCard.classList.remove(
-              "is-visible"
-            );
-
-
-            setTimeout(() => {
-
-              currentLiveIndex =
-                (currentLiveIndex + 1) %
-                liveItems.length;
-
-              showLiveCard();
-
-            }, LIVE_FADE_DURATION);
-
-          }, LIVE_SLIDE_INTERVAL);
-      }
-    }
+      }, LIVE_SLIDE_INTERVAL);
+  }
+}
 
 
     /* =========================================
@@ -780,7 +833,7 @@
               <div class="upcoming-time">
                 ${formatTime(
                   item.scheduled_at
-                )}
+                )}〜
               </div>
 
               <div class="upcoming-body">
@@ -1255,17 +1308,30 @@
                 video.scheduled_at
             )
 
-            .filter(
-              video =>
+            .filter(video => {
+              const scheduled =
                 new Date(
                   video.scheduled_at
-                ).getTime()
-                >=
-                now -
+                ).getTime();
+
+              const fourteenDaysLater =
+                now +
+                14 *
+                24 *
+                60 *
+                60 *
+                1000;
+
+              return (
+                scheduled >=
+                  now -
                   5 *
                   60 *
-                  1000
-            )
+                  1000 &&
+                scheduled <=
+                  fourteenDaysLater
+              );
+            })
 
             .sort(
               (a, b) =>
