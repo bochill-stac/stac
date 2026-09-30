@@ -701,7 +701,15 @@
               rel="noopener noreferrer"
             >
 
-              <div class="other-live-dot"></div>
+              <div class="other-live-thumb">
+                <img
+                  src="${escapeHtml(getThumbnail(item))}"
+                  alt=""
+                  loading="lazy"
+                >
+              </div>
+
+              <span class="other-live-dot"></span>
 
               <div class="other-live-streamer">
                 ${escapeHtml(
@@ -833,7 +841,7 @@
               <div class="upcoming-time">
                 ${formatTime(
                   item.scheduled_at
-                )}〜
+                )}
               </div>
 
               <div class="upcoming-body">
