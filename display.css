@@ -903,12 +903,13 @@ button {
 }
 
 .other-live-item {
-  display: inline-flex;
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
   align-items: center;
-  gap: 7px;
+  gap: 9px;
   min-width: 0;
-  max-width: 210px;
-  padding: 5px 9px 5px 5px;
+  width: 170px;
+  padding: 5px 8px 5px 5px;
   border: 1px solid var(--line);
   border-radius: 10px;
   background: var(--panel-soft);
@@ -924,9 +925,8 @@ button {
 }
 
 .other-live-thumb {
-  width: 34px;
-  height: 24px;
-  flex: 0 0 34px;
+  width: 56px;
+  height: 32px;
   overflow: hidden;
   border-radius: 6px;
   background: #000;
@@ -940,12 +940,7 @@ button {
 }
 
 .other-live-dot {
-  width: 6px;
-  height: 6px;
-  flex: 0 0 6px;
-  border-radius: 50%;
-  background: var(--live);
-  box-shadow: 0 0 8px rgba(239,170,182,.45);
+  display: none;
 }
 
 .other-live-streamer {
