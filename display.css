@@ -179,9 +179,12 @@ button {
 .live-section {
   grid-column: 1;
   grid-row: 1 / span 2;
-  display: flex;
-  flex-direction: column;
+
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+
   min-height: 480px;
+  overflow: hidden;
 }
 
 .upcoming-section {
@@ -244,23 +247,34 @@ button {
 }
 
 .live-list {
-  flex: 1;
   min-height: 0;
-  padding: 0 14px 14px;
+  padding: 0 14px 10px;
+  overflow: hidden;
 }
 
 .live-card {
   position: relative;
+
   display: flex;
   flex-direction: column;
-  height: 100%;
-  min-height: 395px;
+
+  width: 100%;
+  height: auto;
+  min-height: 0;
+
   overflow: hidden;
+
   border-radius: 14px;
   background: var(--panel-soft);
   text-decoration: none;
+
   border: 1px solid var(--line);
-  transition: transform .18s ease, background .18s ease, border-color .18s ease;
+
+  transition:
+    transform .18s ease,
+    background .18s ease,
+    border-color .18s ease,
+    opacity .35s ease;
 }
 
 .live-card:hover {
@@ -269,19 +283,25 @@ button {
   border-color: var(--line-strong);
 }
 
+.live-thumbnail {
+  position: relative;
+
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  flex: 0 0 auto;
+  min-height: 0;
+
+  overflow: hidden;
+
+  background: #000;
+}
+
 .live-thumbnail img {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: center;
-}
-
-.live-thumbnail img {
-  width: 100%;
-  height: 100%;
-  display: block;
-  object-fit: cover;
 }
 
 .live-overlay {
@@ -777,7 +797,7 @@ button {
   }
 
   .live-card {
-    min-height: 350px;
+    min-height: 0;
   }
 
   .x-post-list {
@@ -896,39 +916,44 @@ button {
 
 .other-live-list {
   display: flex;
-  flex-wrap: wrap;
-  gap: 7px;
-  max-height: 72px;
-  overflow: hidden;
+  flex-wrap: nowrap;
+  gap: 10px;
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+
+.other-live-list::-webkit-scrollbar {
+  display: none;
 }
 
 .other-live-item {
-  display: grid;
-  grid-template-columns: 56px minmax(0, 1fr);
-  align-items: center;
-  gap: 9px;
-  min-width: 0;
-  width: 170px;
-  padding: 5px 8px 5px 5px;
+  flex: 0 0 160px;
+  width: 160px;
+  min-width: 160px;
+  aspect-ratio: 16 / 9;
+  height: auto;
+  display: block;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
   border: 1px solid var(--line);
-  border-radius: 10px;
-  background: var(--panel-soft);
-  color: var(--text-soft);
+  border-radius: 9px;
+  background: #000;
   text-decoration: none;
-  transition: background .18s ease, border-color .18s ease, color .18s ease;
+  transition: transform .18s ease, border-color .18s ease, opacity .18s ease;
 }
 
 .other-live-item:hover {
-  background: var(--panel-hover);
+  transform: translateY(-2px);
   border-color: var(--line-strong);
-  color: var(--text);
 }
 
 .other-live-thumb {
-  width: 56px;
-  height: 32px;
+  width: 100%;
+  height: 100%;
   overflow: hidden;
-  border-radius: 6px;
   background: #000;
 }
 
@@ -937,20 +962,12 @@ button {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
 }
 
-.other-live-dot {
-  display: none;
-}
-
-.other-live-streamer {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 11px;
-  font-weight: 680;
-}
+/* =========================================
+   OTHER LIVE - MOBILE
+========================================= */
 
 @media (max-width: 760px) {
   .other-live {
@@ -958,21 +975,13 @@ button {
   }
 
   .other-live-list {
-    max-height: 62px;
+    gap: 8px;
   }
 
   .other-live-item {
-    max-width: 190px;
-  }
-
-  .other-live-thumb {
-    width: 32px;
-    height: 23px;
-    flex-basis: 32px;
-  }
-
-  .other-live-streamer {
-    font-size: 10.5px;
+    flex: 0 0 144px;
+    width: 144px;
+    min-width: 144px;
   }
 }
 

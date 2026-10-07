@@ -659,72 +659,63 @@
 
   currentLiveIndex = 0;
 
-  const renderOtherLive = () => {
+const renderOtherLive = () => {
 
-    if (!otherContainer) return;
+  if (!otherContainer) return;
 
-    if (liveItems.length <= 1) {
-      otherContainer.innerHTML = "";
-      return;
-    }
+  if (liveItems.length <= 1) {
+    otherContainer.innerHTML = "";
+    return;
+  }
 
-    const currentItem =
-      liveItems[
-        currentLiveIndex %
-        liveItems.length
-      ];
+  const currentItem =
+    liveItems[
+      currentLiveIndex %
+      liveItems.length
+    ];
 
-    const others =
-      liveItems.filter(
-        item =>
-          item.video_id !==
-          currentItem.video_id
-      );
+  const others =
+    liveItems.filter(
+      item =>
+        item.video_id !==
+        currentItem.video_id
+    );
 
-    otherContainer.innerHTML = `
-      <div class="other-live-header">
-        <span>他の配信中</span>
-        <span class="other-live-count">
-          ${liveItems.length}配信中
-        </span>
-      </div>
+  otherContainer.innerHTML = `
+    <div class="other-live-header">
+      <span>他の配信中</span>
+      <span class="other-live-count">
+        ${liveItems.length}配信中
+      </span>
+    </div>
 
-      <div class="other-live-list">
-        ${others
-          .map(item => `
-            <a
-              class="other-live-item"
-              href="${escapeHtml(
-                getYouTubeUrl(item)
-              )}"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-
-              <div class="other-live-thumb">
-                <img
-                  src="${escapeHtml(getThumbnail(item))}"
-                  alt=""
-                  loading="lazy"
-                >
-              </div>
-
-              <span class="other-live-dot"></span>
-
-              <div class="other-live-streamer">
-                ${escapeHtml(
-                  item.streamer_name ||
-                  item.streamer_id ||
-                  "STREAMER"
-                )}
-              </div>
-
-            </a>
-          `)
-          .join("")}
-      </div>
-    `;
-  };
+    <div class="other-live-list">
+      ${others
+        .map(item => `
+          <a
+            class="other-live-item"
+            href="${escapeHtml(
+              getYouTubeUrl(item)
+            )}"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="配信を見る"
+          >
+            <div class="other-live-thumb">
+              <img
+                src="${escapeHtml(
+                  getThumbnail(item)
+                )}"
+                alt=""
+                loading="lazy"
+              >
+            </div>
+          </a>
+        `)
+        .join("")}
+    </div>
+  `;
+};
 
   const showLiveCard = () => {
 
