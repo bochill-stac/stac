@@ -214,8 +214,8 @@
     ========================================= */
 
     const VIDEO_RETENTION_DAYS = 14;
-    const LIVE_SLIDE_INTERVAL = 5000;
-    const LIVE_FADE_DURATION = 350;
+    const LIVE_SLIDE_INTERVAL = 6500;
+    const LIVE_FADE_DURATION = 700;
 
 
     /* =========================================
@@ -620,168 +620,156 @@
 
     function renderLive(items) {
 
-  liveItems = items;
+      liveItems = items || [];
 
-  if (liveSlideTimer) {
-    clearInterval(liveSlideTimer);
-    liveSlideTimer = null;
-  }
+      if (liveSlideTimer) {
+        clearInterval(liveSlideTimer);
+        liveSlideTimer = null;
+      }
 
-  const container = $("#live-list");
-  const otherContainer = $("#other-live");
+      const container = $("#live-list");
+      const otherContainer = $("#other-live");
 
-  if (!container) return;
+      if (!container) return;
 
-  if (!items.length) {
-
-    container.innerHTML = `
-      <div class="empty-state live-empty">
-
-        <div class="empty-orb"></div>
-
-        <div class="empty-title">
-          現在、配信はありません
-        </div>
-
-        <div class="empty-sub">
-          配信が始まるとここに表示されます
-        </div>
-
-      </div>
-    `;
-
-    if (otherContainer) {
-      otherContainer.innerHTML = "";
-    }
-
-    return;
-  }
-
-  currentLiveIndex = 0;
-
-const renderOtherLive = () => {
-
-  if (!otherContainer) return;
-
-  if (liveItems.length <= 1) {
-    otherContainer.innerHTML = "";
-    return;
-  }
-
-  const currentItem =
-    liveItems[
-      currentLiveIndex %
-      liveItems.length
-    ];
-
-  const others =
-    liveItems.filter(
-      item =>
-        item.video_id !==
-        currentItem.video_id
-    );
-
-  otherContainer.innerHTML = `
-    <div class="other-live-header">
-      <span>他の配信中</span>
-      <span class="other-live-count">
-        ${liveItems.length}配信中
-      </span>
-    </div>
-
-    <div class="other-live-list">
-      ${others
-        .map(item => `
-          <a
-            class="other-live-item"
-            href="${escapeHtml(
-              getYouTubeUrl(item)
-            )}"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="配信を見る"
-          >
-            <div class="other-live-thumb">
-              <img
-                src="${escapeHtml(
-                  getThumbnail(item)
-                )}"
-                alt=""
-                loading="lazy"
-              >
+      if (!liveItems.length) {
+        container.innerHTML = `
+          <div class="empty-state live-empty">
+            <div class="empty-orb"></div>
+            <div class="empty-title">
+              現在、配信はありません
             </div>
-          </a>
-        `)
-        .join("")}
-    </div>
-  `;
-};
+            <div class="empty-sub">
+              配信が始まるとここに表示されます
+            </div>
+          </div>
+        `;
 
-  const showLiveCard = () => {
+        if (otherContainer) {
+          otherContainer.innerHTML = "";
+        }
 
-    const item =
-      liveItems[
-        currentLiveIndex %
-        liveItems.length
-      ];
+        return;
+      }
 
-    container.innerHTML =
-      createLiveCard(item);
+      currentLiveIndex = 0;
 
-    const card =
-      container.querySelector(
-        ".live-card"
-      );
+      const createLiveSlide = (item) => {
+        const slide = document.createElement("div");
+        slide.className = "live-slide";
+        slide.innerHTML = createLiveCard(item);
+        return slide;
+      };
 
-    if (!card) return;
+      const renderOtherLive = () => {
+        if (!otherContainer) return;
 
-    renderOtherLive();
+        if (liveItems.length <= 1) {
+          otherContainer.innerHTML = "";
+          return;
+        }
 
-    requestAnimationFrame(() => {
+        const currentItem =
+          liveItems[currentLiveIndex % liveItems.length];
 
-      requestAnimationFrame(() => {
-
-        card.classList.add(
-          "is-visible"
+        const others = liveItems.filter(
+          item => item.video_id !== currentItem.video_id
         );
 
-      });
+        otherContainer.innerHTML = `
+          <div class="other-live-header">
+            <span>他の配信中</span>
+            <span class="other-live-count">
+              ${liveItems.length}配信中
+            </span>
+          </div>
 
-    });
-  };
+          <div class="other-live-list">
+            ${others
+              .map(item => `
+                <a
+                  class="other-live-item"
+                  href="${escapeHtml(getYouTubeUrl(item))}"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="配信を見る"
+                >
+                  <div class="other-live-thumb">
+                    <img
+                      src="${escapeHtml(getThumbnail(item))}"
+                      alt=""
+                      loading="lazy"
+                    >
+                  </div>
+                </a>
+              `)
+              .join("")}
+          </div>
+        `;
+      };
 
-  showLiveCard();
+      const showInitialSlide = () => {
+        container.innerHTML = "";
 
-  if (items.length > 1) {
-
-    liveSlideTimer =
-      setInterval(() => {
-
-        const currentCard =
-          container.querySelector(
-            ".live-card"
-          );
-
-        if (!currentCard) return;
-
-        currentCard.classList.remove(
-          "is-visible"
+        const slide = createLiveSlide(
+          liveItems[currentLiveIndex]
         );
 
-        setTimeout(() => {
+        container.appendChild(slide);
+        renderOtherLive();
 
-          currentLiveIndex =
-            (currentLiveIndex + 1) %
-            liveItems.length;
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            slide.classList.add("is-visible");
+          });
+        });
+      };
 
-          showLiveCard();
+      const nextSlide = () => {
+        if (liveItems.length <= 1) return;
 
-        }, LIVE_FADE_DURATION);
+        const currentSlide =
+          container.querySelector(".live-slide.is-visible");
 
-      }, LIVE_SLIDE_INTERVAL);
-  }
-}
+        currentLiveIndex =
+          (currentLiveIndex + 1) % liveItems.length;
 
+        const nextSlideElement = createLiveSlide(
+          liveItems[currentLiveIndex]
+        );
+
+        container.appendChild(nextSlideElement);
+        renderOtherLive();
+
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            nextSlideElement.classList.add("is-visible");
+
+            if (currentSlide) {
+              currentSlide.classList.remove("is-visible");
+            }
+          });
+        });
+
+        window.setTimeout(() => {
+          if (
+            currentSlide &&
+            currentSlide.parentNode === container
+          ) {
+            currentSlide.remove();
+          }
+        }, LIVE_FADE_DURATION + 80);
+      };
+
+      showInitialSlide();
+
+      if (liveItems.length > 1) {
+        liveSlideTimer = setInterval(
+          nextSlide,
+          LIVE_SLIDE_INTERVAL
+        );
+      }
+    }
 
     /* =========================================
        UPCOMING
