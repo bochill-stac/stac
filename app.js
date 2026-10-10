@@ -1291,12 +1291,14 @@ async function init() {
    Auto Sync
 ========================================================= */
 
-setInterval(async () => {
-  if (!previewMode && currentUser && !$("#app")?.classList.contains("hidden")) {
-    await loadStreamers();
-    await loadData();
-  }
-}, 60000);
+// メンテナンス中：60秒ごとのSupabase自動取得を一時停止
+// 必要になったら下の setInterval ブロックを戻してください。
+// setInterval(async () => {
+//   if (!previewMode && currentUser && !$("#app")?.classList.contains("hidden")) {
+//     await loadStreamers();
+//     await loadData();
+//   }
+// }, 60000);
 
 /* =========================================================
    Start

@@ -1437,13 +1437,10 @@
     );
 
 
-    loadDisplayData();
-
-
-    setInterval(
-      loadDisplayData,
-      60 * 1000
-    );
+    // メンテナンス中：Supabaseへの初回取得・60秒ごとの自動取得を一時停止
+    // 表示データは更新されません。再開するときは下の2ブロックのコメントを外してください。
+    // loadDisplayData();
+    // setInterval(loadDisplayData, 60 * 1000);
 
   </script>
 
